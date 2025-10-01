@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AOI-Beurteilungstest - Asetronics AG</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            border-bottom: 3px solid #2c5aa0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 20px;
+        }
+
+        /* SAUBERER LOGO-UPLOAD BEREICH */
+        .logo-container {
+            width: 200px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-container:hover {
+            background: #e3f2fd;
+            border-color: #2c5aa0;
+            transform: translateY(-1px);
+        }
+
+        .logo-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-placeholder {
+            color: #6c757d;
+            font-size: 12px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .title-input {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c5aa0;
+            border: none;
+            border-bottom: 3px solid #e9ecef;
+            padding: 12px 0;
+            width: 100%;
+            background: transparent;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .title-input:focus {
+            outline: none;
+            border-bottom-color: #2c5aa0;
+            color: #1e3d6f;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .info-input {
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .info-input:focus {
+            outline: none;
+            border-color: #2c5aa0;
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+            background: white;
+        }
+
+        .info-input.required-field {
+            border-color: #dc3545;
+        }
+
+        .progress-container {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #28a745, #20c997);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .questions-section {
+            margin-top: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .question-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .question-card.incomplete {
+            border-left: 5px solid #ffc107;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3d6f 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(44, 90, 160, 0.3);
+        }
+
+        .question-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-images-btn, .zoom-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .add-images-btn:hover, .zoom-btn:hover {
+            background: linear-gradient(135deg, #218838 0%, #1aa085 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .delete-question-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .delete-question-btn:hover {
+            background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        .images-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* DRAG & DROP BEREICH FÜR BILDER */
+        .image-upload {
+            width: 220px;
+            height: 165px;
+            border: 3px dashed #ced4da;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .image-upload:hover {
+            border-color: #2c5aa0;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(44, 90, 160, 0.2);
+        }
+
+        /* DRAG & DROP EFFEKTE */
+        .image-upload.drag-over {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        }
+
+        .image-upload img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            cursor: zoom-in;
+        }
+
+        .image-placeholder {
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .image-upload:hover .remove-image {
+            display: block;
+        }
+
+        .assessment-options {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .option-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 25px;
+            border: 3px solid #e9ecef;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            font-weight: 500;
+        }
+
+        .option-group:hover {
+            border-color: #2c5aa0;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(44, 90, 160, 0.2);
+        }
+
+        .option-group.selected-gut {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .option-group.selected-nicht-gut {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .option-radio {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+        }
+
+        .option-label {
+            font-weight: 500;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .comment-field {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 12px;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .comment-field.required-comment {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+
+        .evaluation-section {
+            background: #f8f9fa;
+            border: 2px solid #2c5aa0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-good { color: #28a745; }
+        .score-warning { color: #ffc107; }
+        .score-danger { color: #dc3545; }
+
+        .result-status {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .status-passed {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .signature-section {
+            border-top: 2px solid #e9ecef;
+            padding-top: 30px;
+            margin-top: 30px;
+        }
+
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .signature-field {
+            text-align: center;
+        }
+
+        /* UNTERSCHRIFT STYLES */
+        .signature-canvas-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .signature-canvas {
+            border: 2px solid #2c5aa0;
+            border-radius: 8px;
+            cursor: crosshair;
+            background: white;
+            width: 100%;
+            height: 120px;
+            touch-action: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .signature-canvas:hover {
+            border-color: #1e3d6f;
+            box-shadow: 0 4px 12px rgba(44, 90, 160, 0.2);
+        }
+
+        .signature-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #adb5bd;
+            font-size: 14px;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .signature-hint.hidden {
+            display: none;
+        }
+
+        .clear-signature-btn {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: #212529;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(255, 193, 7, 0.3);
+        }
+
+        .clear-signature-btn:hover {
+            background: linear-gradient(135deg, #e0a800 0%, #e8590c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.4);
+        }
+
+        .signature-label {
+            font-weight: 600;
+            color: #495057;
+            margin-top: 10px;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3d6f 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e3d6f 0%, #0f2142 100%);
+            box-shadow: 0 4px 15px rgba(44, 90, 160, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #218838 0%, #1aa085 100%);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #138496 0%, #1aa085 100%);
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e0a800 0%, #e8590c 100%);
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #545b62 0%, #343a40 100%);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .warning-message {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            max-height: 80%;
+            object-fit: contain;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #bbb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .mode-selection {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
+            border: 3px solid #2196f3;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(33, 150, 243, 0.1);
+        }
+
+        .mode-info {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        /* RICHTIG/FALSCH ANZEIGE PRO FRAGE */
+        .answer-indicator {
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .answer-indicator.answer-correct {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #28a745;
+        }
+
+        .answer-indicator.answer-wrong {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 1px solid #dc3545;
+        }
+
+        .answer-indicator.answer-setup {
+            background: linear-gradient(135deg, #cce7ff 0%, #b3d9ff 100%);
+            color: #0056b3;
+            border: 1px solid #2c5aa0;
+        }
+
+        .correct-answer {
+            border: 3px solid #28a745 !important;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+        }
+
+        /* Employee Mode Styles */
+        .employee-mode .add-images-btn,
+        .employee-mode .delete-question-btn,
+        .employee-mode .mode-selection,
+        .employee-mode #passingScoreDisplay,
+        .employee-mode #passingScoreContainer,
+        .employee-mode .btn-primary:not(#printBtn):not(#exportBtn):not(#finalizeBtn),
+        .employee-mode #exportProgressMsg {
+            display: none !important;
+        }
+
+        /* Finalize Button - NUR im Employee Mode sichtbar */
+        #finalizeBtn {
+            display: none;
+        }
+
+        .employee-mode #finalizeBtn {
+            display: inline-block !important;
+        }
+
+        /* Test gesperrt Status */
+        .test-finalized .option-group {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .test-finalized .comment-field {
+            pointer-events: none;
+            background: #f8f9fa;
+        }
+
+        .test-finalized .assessment-options {
+            pointer-events: none;
+        }
+
+        .employee-mode .comment-field {
+            display: block !important;
+        }
+
+        .employee-mode .question-controls {
+            display: none !important;
+        }
+
+        .employee-mode .controls {
+            justify-content: center;
+        }
+
+        .employee-mode .controls .btn:not(#printBtn):not(#exportBtn):not(#finalizeBtn) {
+            display: none !important;
+        }
+
+        /* Question Counter */
+        .question-counter {
+            background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(23, 162, 184, 0.3);
+        }
+
+        /* ⏱️ TIMER STYLES */
+        .timer-display {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(111, 66, 193, 0.3);
+            display: none;
+        }
+
+        .employee-mode .timer-display {
+            display: block !important;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                font-size: 12px;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+                max-width: none;
+                padding: 15px;
+            }
+            
+            .mode-selection, #modeSelection {
+                display: none !important;
+            }
+            
+            .controls {
+                display: none !important;
+            }
+            
+            .add-images-btn, .zoom-btn, .remove-image, .delete-question-btn, .question-controls {
+                display: none !important;
+            }
+            
+            .question-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+                border: 1px solid #ccc;
+            }
+            
+            .progress-container, .question-counter {
+                display: none !important;
+            }
+            
+            .header {
+                border-bottom: 2px solid #000;
+                margin-bottom: 20px;
+            }
+            
+            .title-input {
+                border: none;
+                font-size: 20px;
+                text-align: center;
+            }
+            
+            .info-input {
+                border: none;
+                border-bottom: 1px solid #000;
+                background: transparent;
+                padding: 5px 0;
+            }
+            
+            .evaluation-section {
+                border: 2px solid #000;
+                margin: 20px 0;
+            }
+            
+            .signature-section {
+                margin-top: 30px;
+                border-top: 2px solid #000;
+            }
+
+            .signature-canvas {
+                border: 1px solid #000;
+            }
+
+            .clear-signature-btn, .signature-hint {
+                display: none !important;
+            }
+
+            .timer-display {
+                display: block !important;
+                background: white;
+                color: #000;
+                border: 1px solid #000;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .assessment-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .signature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .images-container {
+                justify-content: center;
+            }
+
+            .image-upload {
+                width: 180px;
+                height: 135px;
+            }
+
+            .signature-canvas {
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="header-top">
+                <div class="logo-container" onclick="document.getElementById('logoInput').click()">
+                    <div class="logo-placeholder" id="logoPlaceholder">
+                        🏢 Firmenlogo<br>hinzufügen
+                    </div>
+                    <input type="file" id="logoInput" accept="image/*" class="hidden">
+                </div>
+                
+                <input type="text" class="title-input" id="testTitle" 
+                       placeholder="Titel hier eingeben..." 
+                       value="AOI-Beurteilungstest - Leiterplatten-Qualitätskontrolle">
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-field">
+                    <label class="info-label">Mitarbeitername: <span class="required">*</span></label>
+                    <input type="text" class="info-input" id="employeeName" placeholder="Name eingeben" required>
+                </div>
+                <div class="info-field">
+                    <label class="info-label">Mitarbeiternummer: <span class="required">*</span></label>
+                    <input type="text" class="info-input" id="employeeNumber" placeholder="Nummer eingeben" required>
+                </div>
+                <div class="info-field">
+                    <label class="info-label">Prüfdatum:</label>
+                    <input type="date" class="info-input" id="testDate">
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Selection - Only for Setup -->
+        <div class="mode-selection" id="modeSelection">
+            <h3>🔧 Prüfer-Modus - Test-Vorlage erstellen</h3>
+            <div class="mode-info">
+                <strong>Anleitung:</strong> Laden Sie bis zu 3 Bilder pro Frage hoch (auch per <strong>Drag & Drop!</strong>), legen Sie die richtigen Antworten fest und exportieren Sie die Vorlage für Ihre Mitarbeiter.
+            </div>
+        </div>
+
+        <!-- Question Counter -->
+        <div class="question-counter" id="questionCounter">
+            📋 Anzahl Fragen: <span id="questionCountDisplay">0</span>
+        </div>
+
+        <!-- ⏱️ TIMER ANZEIGE -->
+        <div class="timer-display" id="timerDisplay">
+            ⏱️ Benötigte Zeit: <span id="timerValue">00:00:00</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+
+        <!-- Warning Message -->
+        <div class="warning-message" id="warningMessage">
+            ⚠️ Bitte füllen Sie alle Pflichtfelder aus und beantworten Sie alle Fragen, bevor Sie drucken oder exportieren.
+        </div>
+
+        <!-- Questions Section -->
+        <div class="questions-section">
+            <input type="text" class="section-title" id="sectionTitle" 
+                   placeholder="Beschreibung hier eingeben..." 
+                   value="Beurteilung nach IPC-A-610"
+                   style="border: none; background: transparent; width: 100%; font-size: 20px; font-weight: bold; color: #2c5aa0; margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid #e9ecef;"
+                   onfocus="this.style.borderBottom='2px solid #2c5aa0'"
+                   onblur="this.style.borderBottom='2px solid #e9ecef'">
+            <div id="questionsContainer">
+                <!-- Questions will be generated here -->
+            </div>
+        </div>
+
+        <!-- Evaluation Section -->
+        <div class="evaluation-section" id="evaluationSection">
+            <h3>Testergebnis</h3>
+            <div class="score-display" id="scoreDisplay">0 / 0 Punkte</div>
+            <div id="scorePercentage">0%</div>
+            <div class="result-status" id="resultStatus">Unvollständig</div>
+            <div style="margin-top: 15px;">
+                <small>Bewertung: Richtige Antwort = 1 Punkt | Falsche Antwort = 0 Punkte</small><br>
+                <div id="passingScoreContainer">
+                    <small id="passingScoreDisplay">Mindestpunktzahl zum Bestehen: <input type="number" id="passingScore" value="24" min="0" style="width: 60px; text-align: center;"> Punkte</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unterschriften-Sektion -->
+        <div class="signature-section">
+            <h3>✍️ Digitale Unterschriften</h3>
+            <p style="text-align: center; color: #6c757d; margin-bottom: 20px;">
+                Unterschreiben Sie mit der Maus (Computer) oder mit dem Finger (Tablet/Handy)
+            </p>
+            <div class="signature-grid">
+                <div class="signature-field">
+                    <div class="signature-canvas-container">
+                        <canvas id="employeeSignature" class="signature-canvas" width="400" height="120"></canvas>
+                        <div class="signature-hint" id="employeeSignatureHint">✍️ Hier unterschreiben<br><small>(Mit Maus oder Finger)</small></div>
+                    </div>
+                    <button class="clear-signature-btn" onclick="clearSignature('employee')">🗑️ Löschen</button>
+                    <div class="signature-label">Unterschrift Mitarbeiter</div>
+                    <small>Hiermit bestätige ich die ordnungsgemäße Durchführung des Tests</small>
+                </div>
+
+                <div class="signature-field">
+                    <div class="signature-canvas-container">
+                        <canvas id="examinerSignature" class="signature-canvas" width="400" height="120"></canvas>
+                        <div class="signature-hint" id="examinerSignatureHint">✍️ Hier unterschreiben<br><small>(Mit Maus oder Finger)</small></div>
+                    </div>
+                    <button class="clear-signature-btn" onclick="clearSignature('examiner')">🗑️ Löschen</button>
+                    <div class="signature-label">Unterschrift Prüfer/Ausbilder</div>
+                    <small>Hiermit bestätige ich die Auswertung und Einweisung</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-primary" onclick="addQuestion()">+ Frage hinzufügen</button>
+            <button class="btn btn-primary" onclick="addMultipleQuestions()">+ 10 Fragen hinzufügen</button>
+            <button class="btn btn-success" onclick="saveTestTemplate()" id="saveTemplateBtn">💾 Test-Vorlage exportieren</button>
+            <button class="btn btn-danger" onclick="finalizeTest()" id="finalizeBtn" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">🔒 Test abschließen</button>
+            <button class="btn btn-info" onclick="exportToCSV()" id="exportBtn">📊 Als CSV exportieren</button>
+            <button class="btn btn-success" onclick="validateAndPrint()" id="printBtn">🖨️ Drucken / PDF</button>
+            <button class="btn btn-warning" onclick="saveData()">💾 Zwischenspeichern</button>
+            <button class="btn btn-secondary" onclick="resetForm()">🔄 Zurücksetzen</button>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        let questionCount = 0;
+        let currentMode = 'setup'; // 'setup' or 'employee'
+        let correctAnswers = {}; // Store correct answers for each question
+        let templateLoaded = false;
+
+        // UNTERSCHRIFTEN VARIABLEN
+        let employeeSignaturePad = null;
+        let examinerSignaturePad = null;
+
+        // ⏱️ TIMER VARIABLEN
+        let timerStartTime = null;      // Wann wurde der Timer gestartet?
+        let timerInterval = null;       // Interval für Timer-Update
+        let timerRunning = false;       // Läuft der Timer gerade?
+        let totalTestTime = 0;          // Gesamtzeit in Sekunden
+
+        // ⏱️ TIMER STARTEN
+        function startTimer() {
+            if (timerRunning) return; // Timer läuft bereits
+            
+            timerStartTime = Date.now(); // Aktuelle Zeit speichern
+            timerRunning = true;
+            
+            // Timer sichtbar machen
+            const timerDisplay = document.getElementById('timerDisplay');
+            if (timerDisplay) {
+                timerDisplay.style.display = 'block';
+            }
+            
+            // Timer jede Sekunde aktualisieren
+            timerInterval = setInterval(function() {
+                const elapsed = Math.floor((Date.now() - timerStartTime) / 1000); // Sekunden
+                updateTimerDisplay(elapsed);
+            }, 1000);
+            
+            console.log('⏱️ Timer gestartet');
+        }
+
+        // ⏱️ TIMER STOPPEN
+        function stopTimer() {
+            if (!timerRunning) return; // Timer läuft nicht
+            
+            clearInterval(timerInterval); // Stop Interval
+            timerRunning = false;
+            
+            // Finale Zeit berechnen
+            totalTestTime = Math.floor((Date.now() - timerStartTime) / 1000);
+            
+            console.log(`⏱️ Timer gestoppt - Gesamtzeit: ${totalTestTime} Sekunden`);
+            return totalTestTime;
+        }
+
+        // ⏱️ TIMER ANZEIGE AKTUALISIEREN
+        function updateTimerDisplay(seconds) {
+            const hours = Math.floor(seconds / 3600);        // Stunden
+            const minutes = Math.floor((seconds % 3600) / 60); // Minuten
+            const secs = seconds % 60;                        // Sekunden
+            
+            // Format: 00:00:00
+            const timeString = 
+                String(hours).padStart(2, '0') + ':' + 
+                String(minutes).padStart(2, '0') + ':' + 
+                String(secs).padStart(2, '0');
+            
+            const timerValue = document.getElementById('timerValue');
+            if (timerValue) {
+                timerValue.textContent = timeString;
+            }
+        }
+
+        // ⏱️ ZEIT IN LESBARES FORMAT UMWANDELN
+        function formatTestTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            let result = '';
+            if (hours > 0) result += hours + ' Std. ';
+            if (minutes > 0) result += minutes + ' Min. ';
+            result += secs + ' Sek.';
+            
+            return result;
+        }
+
+        // UNTERSCHRIFTEN SETUP
+        function initSignaturePads() {
+            const employeeCanvas = document.getElementById('employeeSignature');
+            const employeeHint = document.getElementById('employeeSignatureHint');
+            employeeSignaturePad = new SignaturePad(employeeCanvas, employeeHint);
+
+            const examinerCanvas = document.getElementById('examinerSignature');
+            const examinerHint = document.getElementById('examinerSignatureHint');
+            examinerSignaturePad = new SignaturePad(examinerCanvas, examinerHint);
+
+            console.log('✅ Unterschriften-Pads initialisiert');
+        }
+
+        // SIGNATUR-PAD KLASSE
+        class SignaturePad {
+            constructor(canvas, hint) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.hint = hint;
+                this.isDrawing = false;
+                this.isEmpty = true;
+                
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 2;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+
+                this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
+                this.canvas.addEventListener('mousemove', this.draw.bind(this));
+                this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+                this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
+
+                this.canvas.addEventListener('touchstart', this.handleTouch.bind(this));
+                this.canvas.addEventListener('touchmove', this.handleTouch.bind(this));
+                this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
+            }
+
+            startDrawing(e) {
+                this.isDrawing = true;
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                
+                if (this.isEmpty) {
+                    this.hint.classList.add('hidden');
+                    this.isEmpty = false;
+                }
+            }
+
+            draw(e) {
+                if (!this.isDrawing) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.ctx.lineTo(x, y);
+                this.ctx.stroke();
+            }
+
+            stopDrawing() {
+                this.isDrawing = false;
+            }
+
+            handleTouch(e) {
+                e.preventDefault();
+                
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent(
+                    e.type === 'touchstart' ? 'mousedown' : 
+                    e.type === 'touchmove' ? 'mousemove' : 'mouseup',
+                    {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    }
+                );
+                
+                this.canvas.dispatchEvent(mouseEvent);
+            }
+
+            clear() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.isEmpty = true;
+                this.hint.classList.remove('hidden');
+            }
+
+            hasSignature() {
+                return !this.isEmpty;
+            }
+
+            toDataURL() {
+                return this.canvas.toDataURL('image/png');
+            }
+        }
+
+        function clearSignature(type) {
+            if (type === 'employee') {
+                employeeSignaturePad.clear();
+                console.log('🗑️ Mitarbeiter-Unterschrift gelöscht');
+            } else if (type === 'examiner') {
+                examinerSignaturePad.clear();
+                console.log('🗑️ Prüfer-Unterschrift gelöscht');
+            }
+        }
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            document.getElementById('testDate').value = now.toISOString().split('T')[0];
+            
+            document.getElementById('employeeName').addEventListener('input', validateForm);
+            document.getElementById('employeeNumber').addEventListener('input', validateForm);
+            
+            loadSavedData();
+            updateQuestionCounter();
+            setupDragAndDrop();
+            initSignaturePads();
+        });
+
+        // Logo upload handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoInput = document.getElementById('logoInput');
+            if (logoInput) {
+                logoInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        if (file.size > 2 * 1024 * 1024) {
+                            alert('Bild ist zu groß. Bitte wählen Sie ein Bild unter 2MB.');
+                            return;
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const logoContainer = document.querySelector('.logo-container');
+                            logoContainer.innerHTML = `<img src="${e.target.result}" alt="Firmenlogo">`;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+
+        function setupDragAndDrop() {
+            document.addEventListener('dragover', function(e) {
+                if (e.target.closest('.image-upload')) {
+                    e.preventDefault();
+                    e.target.closest('.image-upload').classList.add('drag-over');
+                }
+            });
+
+            document.addEventListener('dragleave', function(e) {
+                if (e.target.closest('.image-upload')) {
+                    e.target.closest('.image-upload').classList.remove('drag-over');
+                }
+            });
+
+            document.addEventListener('drop', function(e) {
+                const imageUpload = e.target.closest('.image-upload');
+                if (imageUpload) {
+                    e.preventDefault();
+                    imageUpload.classList.remove('drag-over');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const file = files[0];
+                        if (file.type.startsWith('image/')) {
+                            handleImageFile(file, imageUpload);
+                        } else {
+                            alert('Bitte nur Bilder hochladen!');
+                        }
+                    }
+                }
+            });
+        }
+
+        function handleImageFile(file, container) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Bild ist zu groß. Bitte wählen Sie ein Bild unter 5MB.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                container.innerHTML = `
+                    <img src="${e.target.result}" alt="Prüfbild" onclick="openModal(this.src)">
+                    <button class="remove-image" onclick="removeImage(event, this)">×</button>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function addQuestion() {
+            questionCount++;
+            const questionsContainer = document.getElementById('questionsContainer');
+            
+            const questionCard = document.createElement('div');
+            questionCard.className = 'question-card incomplete';
+            questionCard.id = `question-${questionCount}`;
+            questionCard.innerHTML = `
+                <div class="question-header">
+                    <div class="question-number">Frage ${questionCount}</div>
+                    <div class="question-controls">
+                        <button class="add-images-btn" onclick="addImageUpload(${questionCount})">+ Bild hinzufügen</button>
+                        <button class="delete-question-btn" onclick="deleteQuestionSafe(${questionCount})" title="Frage löschen">🗑️ Löschen</button>
+                    </div>
+                </div>
+                
+                <div class="images-container" id="images-${questionCount}">
+                    <div class="image-upload" onclick="triggerImageUpload(${questionCount}, this)">
+                        <div class="image-placeholder">
+                            📷<br>
+                            Bild auswählen<br>
+                            <small>(Klicken oder Drag & Drop)</small>
+                        </div>
+                        <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, this)">
+                        <button class="remove-image" onclick="removeImage(event, this)">×</button>
+                    </div>
+                </div>
+                
+                <div class="assessment-options">
+                    <label class="option-group" onclick="selectOption(${questionCount}, 'gut', this)">
+                        <input type="radio" name="question-${questionCount}" value="gut" class="option-radio">
+                        <span class="option-label">✓ Gut</span>
+                    </label>
+                    <label class="option-group" onclick="selectOption(${questionCount}, 'nicht-gut', this)">
+                        <input type="radio" name="question-${questionCount}" value="nicht-gut" class="option-radio">
+                        <span class="option-label">✗ Nicht gut</span>
+                    </label>
+                </div>
+                
+                <textarea class="comment-field" placeholder="PFLICHT: Begründung für Ihre Entscheidung eingeben..." id="comment-${questionCount}" required oninput="validateForm()" style="display: none;"></textarea>
+            `;
+            
+            questionsContainer.appendChild(questionCard);
+            updateProgress();
+            updateEvaluation();
+            updateQuestionCounter();
+        }
+
+        function addMultipleQuestions() {
+            for(let i = 0; i < 10; i++) {
+                addQuestion();
+            }
+            alert('✅ 10 Fragen wurden hinzugefügt!');
+        }
+
+        function deleteQuestionSafe(questionId) {
+            console.log(`Versuche Frage ${questionId} zu löschen`);
+            
+            if (questionCount <= 1) {
+                alert('⛔ Mindestens eine Frage muss vorhanden bleiben!');
+                return;
+            }
+            
+            if (confirm(`🗑️ Frage ${questionId} wirklich löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.`)) {
+                const questionElement = document.getElementById(`question-${questionId}`);
+                console.log(`Gefundenes Element:`, questionElement);
+                
+                if (questionElement) {
+                    questionElement.remove();
+                    console.log(`Frage ${questionId} entfernt`);
+                    
+                    delete correctAnswers[questionId];
+                    renumberAllQuestions();
+                    
+                    updateProgress();
+                    updateEvaluation();
+                    updateQuestionCounter();
+                    validateForm();
+                    
+                    console.log(`✅ Frage ${questionId} erfolgreich gelöscht`);
+                } else {
+                    console.error(`❌ Frage ${questionId} nicht gefunden!`);
+                    alert(`Fehler: Frage ${questionId} konnte nicht gefunden werden!`);
+                }
+            }
+        }
+
+        function renumberAllQuestions() {
+            const allQuestionCards = document.querySelectorAll('.question-card');
+            const newCorrectAnswers = {};
+            
+            allQuestionCards.forEach((card, index) => {
+                const newQuestionId = index + 1;
+                const oldQuestionId = card.id.split('-')[1];
+                
+                card.id = `question-${newQuestionId}`;
+                
+                const questionNumber = card.querySelector('.question-number');
+                if (questionNumber) {
+                    questionNumber.textContent = `Frage ${newQuestionId}`;
+                }
+                
+                const imagesContainer = card.querySelector('.images-container');
+                if (imagesContainer) {
+                    imagesContainer.id = `images-${newQuestionId}`;
+                }
+                
+                const radioButtons = card.querySelectorAll('input[type="radio"]');
+                radioButtons.forEach(radio => {
+                    radio.name = `question-${newQuestionId}`;
+                });
+                
+                const commentField = card.querySelector('.comment-field');
+                if (commentField) {
+                    commentField.id = `comment-${newQuestionId}`;
+                }
+                
+                const addImageBtn = card.querySelector('.add-images-btn');
+                if (addImageBtn) {
+                    addImageBtn.setAttribute('onclick', `addImageUpload(${newQuestionId})`);
+                }
+                
+                const deleteBtn = card.querySelector('.delete-question-btn');
+                if (deleteBtn) {
+                    deleteBtn.setAttribute('onclick', `deleteQuestionSafe(${newQuestionId})`);
+                }
+                
+                const optionGroups = card.querySelectorAll('.option-group');
+                optionGroups.forEach((group, optionIndex) => {
+                    const value = optionIndex === 0 ? 'gut' : 'nicht-gut';
+                    group.setAttribute('onclick', `selectOption(${newQuestionId}, '${value}', this)`);
+                });
+                
+                if (correctAnswers[oldQuestionId]) {
+                    newCorrectAnswers[newQuestionId] = correctAnswers[oldQuestionId];
+                }
+            });
+            
+            correctAnswers = newCorrectAnswers;
+            questionCount = allQuestionCards.length;
+            
+            console.log(`✅ ${questionCount} Fragen neu nummeriert`);
+        }
+
+        function addImageUpload(questionId) {
+            const imagesContainer = document.getElementById(`images-${questionId}`);
+            if (!imagesContainer) {
+                console.error(`Images container für Frage ${questionId} nicht gefunden`);
+                return;
+            }
+            
+            const imageCount = imagesContainer.children.length;
+            
+            if (imageCount < 10) {
+                const imageUpload = document.createElement('div');
+                imageUpload.className = 'image-upload';
+                imageUpload.onclick = function() { triggerImageUpload(questionId, this); };
+                imageUpload.innerHTML = `
+                    <div class="image-placeholder">
+                        📷<br>
+                        Bild ${imageCount + 1}<br>
+                        <small>(Drag & Drop)</small>
+                    </div>
+                    <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, this)">
+                    <button class="remove-image" onclick="removeImage(event, this)">×</button>
+                `;
+                imagesContainer.appendChild(imageUpload);
+            } else {
+                alert('Maximal 10 Bilder pro Frage möglich.');
+            }
+        }
+
+        function triggerImageUpload(questionId, element) {
+            if (currentMode === 'employee') return;
+            const input = element.querySelector('input[type="file"]');
+            if (input) {
+                input.click();
+            }
+        }
+
+        function handleImageUpload(event, input) {
+            const file = event.target.files[0];
+            if (file) {
+                handleImageFile(file, input.parentElement);
+            }
+        }
+
+        function removeImage(event, button) {
+            if (currentMode === 'employee') return;
+            event.stopPropagation();
+            const container = button.parentElement;
+            const imageIndex = Array.from(container.parentElement.children).indexOf(container) + 1;
+            
+            container.innerHTML = `
+                <div class="image-placeholder">
+                    📷<br>
+                    Bild ${imageIndex} auswählen<br>
+                    <small>(Drag & Drop)</small>
+                </div>
+                <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, this)">
+                <button class="remove-image" onclick="removeImage(event, this)">×</button>
+            `;
+            container.onclick = function() { triggerImageUpload(0, this); };
+        }
+
+        function openModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imageSrc;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        function selectOption(questionId, value, element) {
+            const allOptions = element.parentElement.querySelectorAll('.option-group');
+            allOptions.forEach(opt => {
+                opt.classList.remove('selected-gut', 'selected-nicht-gut', 'correct-answer');
+            });
+            
+            element.classList.add(`selected-${value}`);
+            
+            const radio = element.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            if (currentMode === 'setup') {
+                correctAnswers[questionId] = value;
+                element.classList.add('correct-answer');
+                
+                let indicator = document.querySelector(`#question-${questionId} .answer-indicator`);
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.className = 'answer-indicator';
+                    document.getElementById(`question-${questionId}`).appendChild(indicator);
+                }
+                indicator.textContent = '✓ Musterlösung festgelegt';
+                indicator.className = 'answer-indicator answer-setup';
+            }
+            
+            const questionCard = document.getElementById(`question-${questionId}`);
+            if (questionCard) {
+                questionCard.classList.remove('incomplete');
+            }
+            
+            updateProgress();
+            updateEvaluation();
+        }
+
+        function updateProgress() {
+            const totalQuestions = questionCount;
+            let completedQuestions = 0;
+            
+            for (let i = 1; i <= questionCount; i++) {
+                const hasAnswer = document.querySelector(`input[name="question-${i}"]:checked`);
+                
+                if (currentMode === 'setup') {
+                    if (hasAnswer) {
+                        completedQuestions++;
+                    }
+                } else {
+                    const commentField = document.getElementById(`comment-${i}`);
+                    const hasComment = commentField ? commentField.value.trim() : false;
+                    if (hasAnswer && hasComment) {
+                        completedQuestions++;
+                    }
+                }
+            }
+            
+            const percentage = totalQuestions > 0 ? Math.round((completedQuestions / totalQuestions) * 100) : 0;
+            
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.width = percentage + '%';
+                progressBar.textContent = `${completedQuestions} / ${totalQuestions} (${percentage}%)`;
+            }
+        }
+
+        function updateEvaluation() {
+            const totalQuestions = questionCount;
+            let totalScore = 0;
+            let correctCount = 0;
+            let answeredQuestions = 0;
+            
+            for (let i = 1; i <= questionCount; i++) {
+                const selectedOption = document.querySelector(`input[name="question-${i}"]:checked`);
+                const commentField = document.getElementById(`comment-${i}`);
+                const comment = commentField ? commentField.value.trim() : '';
+                
+                if (selectedOption) {
+                    answeredQuestions++;
+                    
+                    if (currentMode === 'setup') {
+                        totalScore += 1;
+                    } else {
+                        if (correctAnswers[i]) {
+                            if (selectedOption.value === correctAnswers[i]) {
+                                correctCount++;
+                                totalScore += 1;
+                            }
+                        } else {
+                            totalScore += 1;
+                        }
+                    }
+                }
+            }
+            
+            const maxScore = totalQuestions * 1;
+            const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+            
+            const passingScoreInput = document.getElementById('passingScore');
+            const passingScore = passingScoreInput ? parseInt(passingScoreInput.value) || 0 : 0;
+            
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const scorePercentage = document.getElementById('scorePercentage');
+            const resultStatus = document.getElementById('resultStatus');
+            
+            const isFinalized = document.body.classList.contains('test-finalized');
+            
+            if (currentMode === 'setup') {
+                let scoreText = `${totalScore} / ${maxScore} Punkte`;
+                if (scoreDisplay) scoreDisplay.textContent = scoreText;
+                if (scorePercentage) scorePercentage.textContent = `${percentage}%`;
+                if (scoreDisplay) scoreDisplay.className = 'score-display';
+                if (resultStatus) {
+                    resultStatus.textContent = 'Prüfer-Modus aktiv';
+                    resultStatus.className = 'result-status';
+                }
+                
+            } else if (!isFinalized) {
+                if (scoreDisplay) scoreDisplay.textContent = '- / - Punkte';
+                if (scorePercentage) scorePercentage.textContent = '-';
+                if (scoreDisplay) scoreDisplay.className = 'score-display';
+                
+                if (resultStatus) {
+                    if (answeredQuestions === totalQuestions) {
+                        resultStatus.textContent = '✓ Alle Fragen beantwortet';
+                        resultStatus.className = 'result-status';
+                    } else {
+                        resultStatus.textContent = 'Unvollständig';
+                        resultStatus.className = 'result-status';
+                    }
+                }
+                
+            } else {
+                let scoreText = `${totalScore} / ${maxScore} Punkte (${correctCount} / ${totalQuestions} richtig)`;
+                if (scoreDisplay) scoreDisplay.textContent = scoreText;
+                if (scorePercentage) scorePercentage.textContent = `${percentage}%`;
+                
+                if (totalScore >= passingScore) {
+                    if (scoreDisplay) scoreDisplay.className = 'score-display score-good';
+                    if (resultStatus) {
+                        resultStatus.textContent = '✅ BESTANDEN';
+                        resultStatus.className = 'result-status status-passed';
+                    }
+                } else {
+                    if (scoreDisplay) scoreDisplay.className = 'score-display score-danger';
+                    if (resultStatus) {
+                        resultStatus.textContent = '❌ NICHT BESTANDEN';
+                        resultStatus.className = 'result-status status-failed';
+                    }
+                }
+            }
+            
+            console.log(`Bewertung: ${totalScore}/${maxScore} Punkte (${percentage}%) - Mindest: ${passingScore} - Abgeschlossen: ${isFinalized}`);
+        }
+
+        function showDetailedResults() {
+            for (let i = 1; i <= questionCount; i++) {
+                const selectedOption = document.querySelector(`input[name="question-${i}"]:checked`);
+                if (selectedOption && correctAnswers[i]) {
+                    const questionCard = document.getElementById(`question-${i}`);
+                    if (questionCard) {
+                        let indicator = questionCard.querySelector('.answer-indicator');
+                        
+                        if (!indicator) {
+                            indicator = document.createElement('div');
+                            indicator.className = 'answer-indicator';
+                            questionCard.appendChild(indicator);
+                        }
+                        
+                        if (correctAnswers[i] === selectedOption.value) {
+                            indicator.textContent = '✅ RICHTIG';
+                            indicator.className = 'answer-indicator answer-correct';
+                        } else {
+                            indicator.textContent = `❌ FALSCH (Richtig wäre: ${getAnswerText(correctAnswers[i])})`;
+                            indicator.className = 'answer-indicator answer-wrong';
+                        }
+                    }
+                }
+            }
+        }
+
+        function getAnswerText(value) {
+            switch(value) {
+                case 'gut': return 'Gut';
+                case 'nicht-gut': return 'Nicht gut';
+                default: return value;
+            }
+        }
+
+        function updateQuestionCounter() {
+            const questionCountDisplay = document.getElementById('questionCountDisplay');
+            if (questionCountDisplay) {
+                questionCountDisplay.textContent = questionCount;
+            }
+        }
+
+        function finalizeTest() {
+            if (!validateForm()) {
+                alert('⛔ Bitte beantworten Sie zuerst alle Fragen und füllen Sie alle Begründungen aus!');
+                return;
+            }
+
+            if (confirm('⚠️ WICHTIG: Test abschließen?\n\n🔒 Nach dem Abschließen können Sie:\n• KEINE Antworten mehr ändern\n• KEINE Begründungen mehr bearbeiten\n• Nur noch drucken/exportieren\n\n✅ Sind Sie sicher, dass Sie den Test jetzt abschließen möchten?')) {
+                
+                // ⏱️ TIMER STOPPEN
+                const testTime = stopTimer();
+                console.log(`⏱️ Test abgeschlossen in: ${formatTestTime(testTime)}`);
+                
+                document.body.classList.add('test-finalized');
+                
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.disabled = true;
+                });
+                
+                document.querySelectorAll('.comment-field').forEach(field => {
+                    field.disabled = true;
+                    field.style.background = '#f8f9fa';
+                    field.style.cursor = 'not-allowed';
+                });
+                
+                document.querySelectorAll('.option-group').forEach(group => {
+                    group.style.pointerEvents = 'none';
+                    group.style.opacity = '0.7';
+                    group.style.cursor = 'not-allowed';
+                });
+                
+                const finalizeBtn = document.getElementById('finalizeBtn');
+                if (finalizeBtn) {
+                    finalizeBtn.style.display = 'none';
+                }
+                
+                const saveDataBtn = document.querySelector('.btn-warning');
+                if (saveDataBtn) {
+                    saveDataBtn.style.display = 'none';
+                }
+                
+                const resetBtn = document.querySelector('.btn-secondary');
+                if (resetBtn) {
+                    resetBtn.style.display = 'none';
+                }
+                
+                updateEvaluation();
+                showDetailedResults();
+                
+                alert(`✅ Test erfolgreich abgeschlossen!\n\n🔒 Alle Antworten sind jetzt gesperrt.\n⏱️ Benötigte Zeit: ${formatTestTime(testTime)}\n📊 Sie können das Ergebnis nun drucken oder exportieren.`);
+            }
+        }
+
+        function switchToEmployeeMode() {
+            currentMode = 'employee';
+            document.body.classList.add('employee-mode');
+            
+            const modeSelection = document.getElementById('modeSelection');
+            const passingScoreContainer = document.getElementById('passingScoreContainer');
+            
+            if (modeSelection) modeSelection.style.display = 'none';
+            if (passingScoreContainer) passingScoreContainer.style.display = 'none';
+            
+            document.querySelectorAll('.comment-field').forEach(field => {
+                field.style.display = 'block';
+            });
+            
+            document.querySelectorAll('.answer-indicator').forEach(indicator => indicator.remove());
+            document.querySelectorAll('.option-group').forEach(group => {
+                group.classList.remove('selected-gut', 'selected-nicht-gut', 'correct-answer');
+            });
+            document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+            
+            updateProgress();
+            updateEvaluation();
+            
+            // ⏱️ TIMER IM MITARBEITER-MODUS STARTEN
+            setTimeout(function() {
+                startTimer();
+            }, 1000);
+        }
+
+        function saveTestTemplate() {
+            if (currentMode !== 'setup') {
+                alert('Nur im Prüfer-Modus möglich!');
+                return;
+            }
+            
+            if (questionCount === 0) {
+                alert('⛔ Keine Fragen vorhanden! Bitte fügen Sie mindestens eine Frage hinzu.');
+                return;
+            }
+            
+            const correctAnswerCount = Object.keys(correctAnswers).length;
+            if (correctAnswerCount === 0) {
+                alert('⛔ Keine Musterlösungen festgelegt! Bitte legen Sie für mindestens eine Frage die richtige Antwort fest.');
+                return;
+            }
+            
+            const progressMsg = document.createElement('div');
+            progressMsg.id = 'exportProgressMsg';
+            progressMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2c5aa0; color: white; padding: 20px; border-radius: 10px; z-index: 9999; font-weight: bold;';
+            progressMsg.innerHTML = '⏳ Exportiere Vorlage...<br><small>Bitte warten, große Dateien werden verarbeitet...</small>';
+            document.body.appendChild(progressMsg);
+            
+            try {
+                const template = {
+                    title: document.getElementById('testTitle').value,
+                    sectionTitle: document.getElementById('sectionTitle').value,
+                    passingScore: document.getElementById('passingScore').value,
+                    correctAnswers: correctAnswers,
+                    questionCount: questionCount,
+                    questions: []
+                };
+                
+                let totalImages = 0;
+                for (let i = 1; i <= questionCount; i++) {
+                    const imagesContainer = document.getElementById(`images-${i}`);
+                    const images = [];
+                    
+                    if (imagesContainer) {
+                        const imgElements = imagesContainer.querySelectorAll('img');
+                        totalImages += imgElements.length;
+                        
+                        imgElements.forEach(img => {
+                            if (img.src.length > 500000) {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = Math.min(img.naturalWidth, 800);
+                                canvas.height = Math.min(img.naturalHeight, 600);
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                images.push(canvas.toDataURL('image/jpeg', 0.8));
+                            } else {
+                                images.push(img.src);
+                            }
+                        });
+                    }
+                    
+                    template.questions.push({
+                        id: i,
+                        images: images,
+                        correctAnswer: correctAnswers[i] || null
+                    });
+                }
+                
+                try {
+                    localStorage.setItem('aoiTestTemplate', JSON.stringify(template));
+                } catch (e) {
+                    console.warn('LocalStorage full, continuing with export...');
+                }
+                
+                setTimeout(() => {
+                    try {
+                        generateTemplateFile(template);
+                        document.body.removeChild(progressMsg);
+                        
+                        alert(`✅ EXPORT ERFOLGREICH!\n\n📊 ${questionCount} Fragen exportiert\n🖼️ ${totalImages} Bilder eingebettet\n📄 Datei "AOI_Test_Mitarbeiter_Vorlage.html" wurde heruntergeladen\n\n💡 Diese Datei können Sie direkt an Ihre Mitarbeiter weitergeben!`);
+                    } catch (error) {
+                        document.body.removeChild(progressMsg);
+                        alert('⛔ Export-Fehler: ' + error.message + '\n\nVersuchen Sie es mit weniger oder kleineren Bildern.');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                document.body.removeChild(progressMsg);
+                alert('⛔ Export-Fehler: ' + error.message + '\n\nMögliche Lösungen:\n• Kleinere Bilder verwenden\n• Weniger Bilder pro Frage\n• Browser-Cache leeren');
+                console.error('Export error:', error);
+            }
+        }
+
+        function generateTemplateFile(template) {
+            try {
+                const htmlContent = generateEmployeeHTML(template);
+                
+                const sizeInMB = new Blob([htmlContent]).size / (1024 * 1024);
+                console.log(`Template file size: ${sizeInMB.toFixed(2)} MB`);
+                
+                if (sizeInMB > 50) {
+                    throw new Error(`Datei zu groß (${sizeInMB.toFixed(1)}MB). Bitte verwenden Sie kleinere Bilder.`);
+                }
+                
+                const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+                
+                if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                    window.navigator.msSaveOrOpenBlob(blob, 'AOI_Test_Mitarbeiter_Vorlage.html');
+                } else {
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    
+                    link.href = url;
+                    link.download = 'AOI_Test_Mitarbeiter_Vorlage.html';
+                    link.style.display = 'none';
+                    
+                    document.body.appendChild(link);
+                    
+                    setTimeout(() => {
+                        link.click();
+                        
+                        setTimeout(() => {
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(url);
+                        }, 1000);
+                    }, 100);
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Generate template file error:', error);
+                throw error;
+            }
+        }
+
+        function generateEmployeeHTML(template) {
+            let currentHTML = document.documentElement.outerHTML;
+            
+            currentHTML = currentHTML.replace(
+                'let correctAnswers = {}; // Store correct answers for each question',
+                `let correctAnswers = ${JSON.stringify(template.correctAnswers)}; // Store correct answers for each question`
+            );
+            
+            currentHTML = currentHTML.replace(
+                "let currentMode = 'setup';",
+                "let currentMode = 'employee';"
+            );
+            
+            currentHTML = currentHTML.replace(
+                '<body>',
+                '<body class="employee-mode">'
+            );
+            
+            currentHTML = currentHTML.replace(
+                /function saveTestTemplate\(\) \{[\s\S]*?\n        \}/,
+                'function saveTestTemplate() { alert("Diese Funktion ist nur für Prüfer verfügbar!"); }'
+            );
+            
+            const templateScript = `
+                <script>
+                    const embeddedTemplate = ${JSON.stringify(template)};
+                    
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const existingProgress = document.getElementById('exportProgressMsg');
+                        if (existingProgress) {
+                            existingProgress.remove();
+                        }
+                        
+                        setTimeout(function() {
+                            loadEmbeddedTemplate();
+                            switchToEmployeeMode();
+                        }, 100);
+                    });
+                    
+                    function loadEmbeddedTemplate() {
+                        const data = embeddedTemplate;
+                        
+                        const questionsContainer = document.getElementById('questionsContainer');
+                        questionsContainer.innerHTML = '';
+                        questionCount = 0;
+                        
+                        document.getElementById('testTitle').value = data.title || '';
+                        document.getElementById('sectionTitle').value = data.sectionTitle || 'Beurteilung nach IPC-A-610';
+                        document.getElementById('passingScore').value = data.passingScore || '0';
+                        
+                        correctAnswers = data.correctAnswers || {};
+                        
+                        const targetQuestionCount = data.questionCount || data.questions.length || 30;
+                        for (let i = 0; i < targetQuestionCount; i++) {
+                            addQuestion();
+                        }
+                        
+                        if (data.questions) {
+                            data.questions.forEach(function(q) {
+                                if (q.id <= questionCount && q.images && q.images.length > 0) {
+                                    const imagesContainer = document.getElementById('images-' + q.id);
+                                    if (imagesContainer) {
+                                        imagesContainer.innerHTML = '';
+                                        
+                                        q.images.forEach(function(imageSrc, index) {
+                                            const imageDiv = document.createElement('div');
+                                            imageDiv.className = 'image-upload';
+                                            imageDiv.innerHTML = '<img src="' + imageSrc + '" alt="Prüfbild ' + (index + 1) + '" onclick="openModal(this.src)">';
+                                            imagesContainer.appendChild(imageDiv);
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                        
+                        templateLoaded = true;
+                        updateQuestionCounter();
+                        updateEvaluation();
+                        console.log('✅ Mitarbeiter-Vorlage geladen: ' + questionCount + ' Fragen mit ' + Object.keys(correctAnswers).length + ' Musterlösungen');
+                    }
+                <\/script>
+            `;
+            
+            currentHTML = currentHTML.replace('<\/body>', templateScript + '<\/body>');
+            
+            return currentHTML;
+        }
+
+        function validateForm() {
+            const nameField = document.getElementById('employeeName');
+            const numberField = document.getElementById('employeeNumber');
+            
+            const name = nameField ? nameField.value.trim() : '';
+            const number = numberField ? numberField.value.trim() : '';
+            const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
+            
+            let allCommentsValid = true;
+            if (currentMode === 'employee') {
+                for (let i = 1; i <= questionCount; i++) {
+                    const commentField = document.getElementById(`comment-${i}`);
+                    const comment = commentField ? commentField.value.trim() : '';
+                    
+                    if (!comment && commentField) {
+                        allCommentsValid = false;
+                        commentField.classList.add('required-comment');
+                    } else if (commentField) {
+                        commentField.classList.remove('required-comment');
+                    }
+                }
+            }
+            
+            if (nameField) nameField.classList.toggle('required-field', !name);
+            if (numberField) numberField.classList.toggle('required-field', !number);
+            
+            const isValid = name && number && answeredQuestions === questionCount && (currentMode === 'setup' || allCommentsValid);
+            
+            const warning = document.getElementById('warningMessage');
+            if (warning) {
+                if (!isValid) {
+                    let warningText = '⚠️ Bitte vervollständigen Sie: ';
+                    if (!name || !number) warningText += 'Mitarbeiterdaten, ';
+                    if (answeredQuestions < questionCount) warningText += 'alle Bewertungen, ';
+                    if (currentMode === 'employee' && !allCommentsValid) warningText += 'alle Begründungen';
+                    warning.textContent = warningText.replace(/, $/, '');
+                    warning.style.display = 'block';
+                } else {
+                    warning.style.display = 'none';
+                }
+            }
+            
+            const printBtn = document.getElementById('printBtn');
+            if (printBtn) {
+                printBtn.disabled = !isValid;
+            }
+            
+            updateProgress();
+            return isValid;
+        }
+
+        function validateAndPrint() {
+            if (validateForm()) {
+                document.body.classList.add('printing');
+                
+                const printInfo = document.createElement('div');
+                printInfo.id = 'printInfo';
+                printInfo.style.cssText = 'position: fixed; top: 0; right: 0; font-size: 10px; color: #666; padding: 5px; background: white; z-index: 1000;';
+                printInfo.innerHTML = `Gedruckt am: ${new Date().toLocaleString('de-DE')}`;
+                document.body.appendChild(printInfo);
+                
+                setTimeout(() => {
+                    window.print();
+                    
+                    setTimeout(() => {
+                        document.body.classList.remove('printing');
+                        if (document.getElementById('printInfo')) {
+                            document.getElementById('printInfo').remove();
+                        }
+                    }, 1000);
+                }, 100);
+            } else {
+                let missingItems = [];
+                
+                const name = document.getElementById('employeeName').value.trim();
+                const number = document.getElementById('employeeNumber').value.trim();
+                if (!name || !number) missingItems.push('Mitarbeiterdaten');
+                
+                const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
+                if (answeredQuestions < questionCount) missingItems.push(`${questionCount - answeredQuestions} Bewertungen`);
+                
+                if (currentMode === 'employee') {
+                    let missingComments = 0;
+                    for (let i = 1; i <= questionCount; i++) {
+                        const commentField = document.getElementById(`comment-${i}`);
+                        const comment = commentField ? commentField.value.trim() : '';
+                        if (!comment) missingComments++;
+                    }
+                    if (missingComments > 0) missingItems.push(`${missingComments} Begründungen`);
+                }
+                
+                alert(`⛔ Drucken nicht möglich!\n\nFehlt noch:\n• ${missingItems.join('\n• ')}\n\n✅ Bitte vervollständigen Sie alle Angaben.`);
+            }
+        }
+
+        function exportToCSV() {
+            if (!validateForm()) {
+                alert('Bitte vervollständigen Sie den Test vor dem Export.');
+                return;
+            }
+            
+            let csv = 'Frage,Bewertung,Punkte,Begründung\n';
+            
+            for (let i = 1; i <= questionCount; i++) {
+                const selectedOption = document.querySelector(`input[name="question-${i}"]:checked`);
+                const commentField = document.getElementById(`comment-${i}`);
+                const comment = commentField ? commentField.value : '';
+                
+                let assessment = '';
+                let points = 0;
+                
+                if (selectedOption) {
+                    if (currentMode === 'employee' && correctAnswers[i]) {
+                        if (selectedOption.value === correctAnswers[i]) {
+                            points = 1;
+                        } else {
+                            points = 0;
+                        }
+                        assessment = selectedOption.value === 'gut' ? 'Gut' : 'Nicht gut';
+                    } else {
+                        assessment = selectedOption.value === 'gut' ? 'Gut' : 'Nicht gut';
+                        points = 1;
+                    }
+                }
+                
+                csv += `"Frage ${i}","${assessment}","${points}","${comment}"\n`;
+            }
+            
+            const totalScore = Array.from(document.querySelectorAll('input[type="radio"]:checked'))
+                .reduce((sum, radio, index) => {
+                    const questionId = index + 1;
+                    if (currentMode === 'employee' && correctAnswers[questionId]) {
+                        return sum + (radio.value === correctAnswers[questionId] ? 1 : 0);
+                    }
+                    return sum + 1;
+                }, 0);
+            
+            csv += `\nZusammenfassung:\n`;
+            csv += `"Mitarbeiter","${document.getElementById('employeeName').value}"\n`;
+            csv += `"Mitarbeiternummer","${document.getElementById('employeeNumber').value}"\n`;
+            csv += `"Datum","${document.getElementById('testDate').value}"\n`;
+            csv += `"Gesamtpunkte","${totalScore} / ${questionCount}"\n`;
+            csv += `"Ergebnis","${totalScore >= parseInt(document.getElementById('passingScore').value) ? 'BESTANDEN' : 'NICHT BESTANDEN'}"\n`;
+            
+            // ⏱️ ZEIT IN CSV EXPORT
+            if (totalTestTime > 0) {
+                csv += `"Benötigte Zeit","${formatTestTime(totalTestTime)}"\n`;
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `AOI-Test_${document.getElementById('employeeName').value.replace(/\s+/g, '_')}_${document.getElementById('testDate').value}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function saveData() {
+            const data = {
+                title: document.getElementById('testTitle').value,
+                sectionTitle: document.getElementById('sectionTitle').value,
+                employeeName: document.getElementById('employeeName').value,
+                employeeNumber: document.getElementById('employeeNumber').value,
+                testDate: document.getElementById('testDate').value,
+                passingScore: document.getElementById('passingScore').value,
+                questions: [],
+                employeeSignature: employeeSignaturePad.hasSignature() ? employeeSignaturePad.toDataURL() : null,
+                examinerSignature: examinerSignaturePad.hasSignature() ? examinerSignaturePad.toDataURL() : null,
+                // ⏱️ TIMER-ZEIT SPEICHERN
+                totalTestTime: totalTestTime,
+                timerStartTime: timerStartTime,
+                timerRunning: timerRunning
+            };
+            
+            for (let i = 1; i <= questionCount; i++) {
+                const selectedOption = document.querySelector(`input[name="question-${i}"]:checked`);
+                const commentField = document.getElementById(`comment-${i}`);
+                const comment = commentField ? commentField.value : '';
+                
+                data.questions.push({
+                    id: i,
+                    answer: selectedOption ? selectedOption.value : null,
+                    comment: comment
+                });
+            }
+            
+            localStorage.setItem('aoiTestData', JSON.stringify(data));
+            alert('✅ Daten wurden zwischengespeichert (inkl. Unterschriften und Timer)!');
+        }
+
+        function loadSavedData() {
+            const savedData = localStorage.getItem('aoiTestData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                
+                const titleField = document.getElementById('testTitle');
+                const sectionField = document.getElementById('sectionTitle');
+                const nameField = document.getElementById('employeeName');
+                const numberField = document.getElementById('employeeNumber');
+                const dateField = document.getElementById('testDate');
+                const passingField = document.getElementById('passingScore');
+                
+                if (titleField) titleField.value = data.title || '';
+                if (sectionField) sectionField.value = data.sectionTitle || 'Beurteilung nach IPC-A-610';
+                if (nameField) nameField.value = data.employeeName || '';
+                if (numberField) numberField.value = data.employeeNumber || '';
+                if (dateField) dateField.value = data.testDate || '';
+                if (passingField) passingField.value = data.passingScore || '0';
+                
+                if (data.questions) {
+                    data.questions.forEach(q => {
+                        if (q.id <= questionCount) {
+                            const commentField = document.getElementById(`comment-${q.id}`);
+                            if (q.comment && commentField) {
+                                commentField.value = q.comment;
+                            }
+                            if (q.answer) {
+                                const radio = document.querySelector(`input[name="question-${q.id}"][value="${q.answer}"]`);
+                                if (radio) {
+                                    radio.checked = true;
+                                    const optionGroup = radio.closest('.option-group');
+                                    if (optionGroup) {
+                                        selectOption(q.id, q.answer, optionGroup);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                if (data.employeeSignature && employeeSignaturePad) {
+                    const img = new Image();
+                    img.onload = function() {
+                        employeeSignaturePad.ctx.drawImage(img, 0, 0);
+                        employeeSignaturePad.isEmpty = false;
+                        employeeSignaturePad.hint.classList.add('hidden');
+                    };
+                    img.src = data.employeeSignature;
+                }
+
+                if (data.examinerSignature && examinerSignaturePad) {
+                    const img = new Image();
+                    img.onload = function() {
+                        examinerSignaturePad.ctx.drawImage(img, 0, 0);
+                        examinerSignaturePad.isEmpty = false;
+                        examinerSignaturePad.hint.classList.add('hidden');
+                    };
+                    img.src = data.examinerSignature;
+                }
+
+                // ⏱️ TIMER-DATEN LADEN
+                if (data.totalTestTime) {
+                    totalTestTime = data.totalTestTime;
+                }
+                if (data.timerStartTime && data.timerRunning) {
+                    // Timer war aktiv beim Speichern - fortsetzen
+                    timerStartTime = data.timerStartTime;
+                    startTimer();
+                }
+                
+                updateProgress();
+                updateEvaluation();
+            }
+        }
+
+        function resetForm() {
+            if (confirm('Möchten Sie wirklich alle Eingaben zurücksetzen? Alle Daten gehen verloren.')) {
+                localStorage.removeItem('aoiTestData');
+                location.reload();
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        setInterval(function() {
+            const nameField = document.getElementById('employeeName');
+            if (nameField && nameField.value.trim()) {
+                saveData();
+            }
+        }, 120000);
+    </script>
+</body>
+</html>
