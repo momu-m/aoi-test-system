@@ -940,13 +940,15 @@
     }
         }
         /* ✅ NEU: Bessere Mobile-Ansicht */
+/* ✅ MOBILE ANSICHT */
 @media (max-width: 768px) {
     .info-grid {
-        grid-template-columns: 1fr; /* Nur 1 Spalte statt 3 */
+        grid-template-columns: 1fr; /* 1 Spalte statt 3 */
     }
     
     .assessment-options {
         flex-direction: column; /* Buttons untereinander */
+        align-items: center;
         gap: 10px;
     }
     
@@ -955,15 +957,24 @@
         justify-content: center;
     }
     
-    .signature-canvas {
-        height: 80px; /* Kleiner auf Mobile */
+    .signature-grid {
+        grid-template-columns: 1fr; /* 1 Unterschrift pro Zeile */
     }
     
+    .signature-canvas {
+        height: 100px; /* Kleiner auf Mobile */
+    }
+
     .images-container {
         grid-template-columns: 1fr; /* 1 Bild pro Reihe */
+        justify-content: center;
+    }
+
+    .image-upload {
+        width: 180px;
+        height: 135px;
     }
 }
-
         
          .images-container {
             display: flex;
