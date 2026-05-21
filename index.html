@@ -8,449 +8,228 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-/* ========== RESET & BASIS ========== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f0f2f5;
-    color: #1a1a2e;
-    line-height: 1.6;
-    min-height: 100vh;
-}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;color:#1a1a2e;line-height:1.6;min-height:100vh}
 
-/* ========== NAVIGATION ========== */
-.navbar {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2c5aa0 100%);
-    color: white;
-    padding: 12px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-.navbar-brand {
-    font-size: 18px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.navbar-brand img { max-height: 36px; }
-.navbar-user {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-size: 14px;
-}
-.navbar-role {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-}
-.role-pruefer { background: #ffc107; color: #333; }
-.role-operator { background: #28a745; color: white; }
-.btn-logout {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.3);
-    color: white;
-    padding: 6px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    transition: all 0.2s;
-}
-.btn-logout:hover { background: rgba(255,255,255,0.3); }
+/* NAV */
+.navbar{background:linear-gradient(135deg,#1e3a5f,#2c5aa0);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+.navbar-brand{font-size:18px;font-weight:700;display:flex;align-items:center;gap:12px}
+.navbar-brand svg{width:32px;height:32px}
+.navbar-user{display:flex;align-items:center;gap:16px;font-size:14px}
+.navbar-role{padding:4px 12px;border-radius:20px;font-weight:600;font-size:12px;text-transform:uppercase}
+.role-pruefer{background:#ffc107;color:#333}
+.role-operator{background:#28a745;color:#fff}
+.btn-logout{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px}
+.btn-logout:hover{background:rgba(255,255,255,.3)}
 
-/* ========== CONTAINER ========== */
-.container { max-width: 1100px; margin: 0 auto; padding: 24px; }
-.view { display: none; }
-.view.active { display: block; }
+/* CONTAINER & VIEWS */
+.container{max-width:1100px;margin:0 auto;padding:24px}
+.view{display:none}.view.active{display:block}
 
-/* ========== KARTEN ========== */
-.card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    padding: 24px;
-    margin-bottom: 20px;
-    border: 1px solid #e9ecef;
-}
-.card-header {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1e3a5f;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e9ecef;
-}
+/* CARDS */
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:24px;margin-bottom:20px;border:1px solid #e9ecef}
+.card-header{font-size:18px;font-weight:700;color:#1e3a5f;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #e9ecef}
 
-/* ========== LOGIN ========== */
-.login-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1e3a5f 0%, #2c5aa0 50%, #1e3a5f 100%);
-}
-.login-card {
-    background: white;
-    border-radius: 16px;
-    padding: 40px;
-    width: 100%;
-    max-width: 440px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-}
-.login-logo { text-align: center; margin-bottom: 24px; }
-.login-logo img { max-height: 60px; }
-.login-title { text-align: center; font-size: 22px; color: #1e3a5f; margin-bottom: 8px; }
-.login-subtitle { text-align: center; color: #6c757d; font-size: 14px; margin-bottom: 28px; }
-.form-group { margin-bottom: 18px; }
-.form-label { display: block; font-weight: 600; font-size: 13px; color: #495057; margin-bottom: 6px; }
-.form-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #dee2e6;
-    border-radius: 8px;
-    font-size: 15px;
-    transition: border-color 0.2s;
-    background: #f8f9fa;
-}
-.form-input:focus { outline: none; border-color: #2c5aa0; background: white; }
-.role-selector { display: flex; gap: 12px; margin-top: 8px; }
-.role-option {
-    flex: 1;
-    padding: 16px;
-    border: 3px solid #dee2e6;
-    border-radius: 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: #f8f9fa;
-}
-.role-option:hover { border-color: #2c5aa0; background: #e8f0fe; }
-.role-option.selected-pruefer { border-color: #ffc107; background: #fff8e1; }
-.role-option.selected-operator { border-color: #28a745; background: #e8f5e9; }
-.role-option-icon { font-size: 28px; margin-bottom: 8px; }
-.role-option-text { font-weight: 600; font-size: 14px; color: #333; }
-.role-option-desc { font-size: 11px; color: #6c757d; margin-top: 4px; }
+/* LOGIN */
+.login-wrapper{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#1e3a5f,#2c5aa0 50%,#1e3a5f)}
+.login-card{background:#fff;border-radius:16px;padding:40px;width:100%;max-width:440px;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-title{text-align:center;font-size:22px;color:#1e3a5f;margin-bottom:8px}
+.login-subtitle{text-align:center;color:#6c757d;font-size:14px;margin-bottom:28px}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-weight:600;font-size:13px;color:#495057;margin-bottom:6px}
+.form-label .req{color:#dc3545}
+.form-input{width:100%;padding:12px 16px;border:2px solid #dee2e6;border-radius:8px;font-size:15px;background:#f8f9fa;transition:border-color .2s}
+.form-input:focus{outline:none;border-color:#2c5aa0;background:#fff}
+.form-input.invalid{border-color:#dc3545;background:#fff5f5}
+.form-error{color:#dc3545;font-size:12px;margin-top:4px}
+.role-selector{display:flex;gap:12px;margin-top:8px}
+.role-option{flex:1;padding:16px;border:3px solid #dee2e6;border-radius:12px;text-align:center;cursor:pointer;transition:all .2s;background:#f8f9fa}
+.role-option:hover{border-color:#2c5aa0;background:#e8f0fe}
+.role-option.sel-p{border-color:#ffc107;background:#fff8e1}
+.role-option.sel-o{border-color:#28a745;background:#e8f5e9}
+.role-icon{font-size:28px;margin-bottom:8px;font-weight:700}
+.role-text{font-weight:600;font-size:14px;color:#333}
+.role-desc{font-size:11px;color:#6c757d;margin-top:4px}
 
-/* ========== BUTTONS ========== */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.btn-primary { background: #2c5aa0; color: white; }
-.btn-primary:hover { background: #1e3a5f; }
-.btn-success { background: #28a745; color: white; }
-.btn-success:hover { background: #218838; }
-.btn-danger { background: #dc3545; color: white; }
-.btn-danger:hover { background: #c82333; }
-.btn-warning { background: #ffc107; color: #333; }
-.btn-warning:hover { background: #e0a800; }
-.btn-secondary { background: #6c757d; color: white; }
-.btn-secondary:hover { background: #545b62; }
-.btn-sm { padding: 6px 14px; font-size: 12px; }
-.btn-lg { padding: 14px 28px; font-size: 16px; }
-.btn-block { width: 100%; }
-.btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.btn-primary{background:#2c5aa0;color:#fff}.btn-primary:hover{background:#1e3a5f}
+.btn-success{background:#28a745;color:#fff}.btn-success:hover{background:#218838}
+.btn-danger{background:#dc3545;color:#fff}.btn-danger:hover{background:#c82333}
+.btn-warning{background:#ffc107;color:#333}.btn-warning:hover{background:#e0a800}
+.btn-secondary{background:#6c757d;color:#fff}.btn-secondary:hover{background:#545b62}
+.btn-outline{background:transparent;border:2px solid #2c5aa0;color:#2c5aa0}.btn-outline:hover{background:#2c5aa0;color:#fff}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-lg{padding:14px 28px;font-size:16px}
+.btn-block{width:100%}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap}
 
-/* ========== DASHBOARD GRID ========== */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-}
-.stat-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    border: 1px solid #e9ecef;
-    text-align: center;
-}
-.stat-number { font-size: 36px; font-weight: 700; color: #2c5aa0; }
-.stat-label { font-size: 13px; color: #6c757d; margin-top: 4px; }
+/* GRID */
+.dashboard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.stat-card{background:#fff;border-radius:12px;padding:20px;border:1px solid #e9ecef;text-align:center}
+.stat-number{font-size:36px;font-weight:700;color:#2c5aa0}
+.stat-label{font-size:13px;color:#6c757d;margin-top:4px}
 
-/* ========== TEST-KARTEN ========== */
-.test-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    border: 2px solid #e9ecef;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-.test-card:hover { border-color: #2c5aa0; box-shadow: 0 4px 16px rgba(44,90,160,0.15); transform: translateY(-2px); }
-.test-card.inactive { opacity: 0.5; }
-.test-title { font-size: 16px; font-weight: 700; color: #1e3a5f; margin-bottom: 6px; }
-.test-meta { font-size: 12px; color: #6c757d; display: flex; gap: 16px; flex-wrap: wrap; }
-.test-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-}
-.badge-active { background: #d4edda; color: #155724; }
-.badge-inactive { background: #f8d7da; color: #721c24; }
+/* TEST CARDS */
+.test-card{background:#fff;border-radius:12px;padding:20px;border:2px solid #e9ecef;transition:all .2s;cursor:pointer}
+.test-card:hover{border-color:#2c5aa0;box-shadow:0 4px 16px rgba(44,90,160,.15);transform:translateY(-2px)}
+.test-card.inactive{opacity:.5}
+.test-title{font-size:16px;font-weight:700;color:#1e3a5f;margin-bottom:6px}
+.test-meta{font-size:12px;color:#6c757d;display:flex;gap:16px;flex-wrap:wrap}
+.test-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-active{background:#d4edda;color:#155724}
+.badge-inactive{background:#f8d7da;color:#721c24}
 
-/* ========== TEST-ERSTELLUNG ========== */
-.question-card {
-    background: #f8f9fa;
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    position: relative;
-}
-.question-number {
-    background: #2c5aa0;
-    color: white;
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-weight: 700;
-    font-size: 13px;
-    display: inline-block;
-    margin-bottom: 12px;
-}
-.images-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
-    margin: 12px 0;
-}
-.image-upload-box {
-    border: 3px dashed #ced4da;
-    border-radius: 10px;
-    height: 130px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    background: white;
-    transition: all 0.2s;
-}
-.image-upload-box:hover { border-color: #2c5aa0; background: #e8f0fe; }
-.image-upload-box img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; }
-.image-upload-box .placeholder-text { color: #6c757d; font-size: 12px; text-align: center; padding: 8px; }
-.image-remove {
-    position: absolute; top: 4px; right: 4px;
-    background: #dc3545; color: white; border: none;
-    border-radius: 50%; width: 22px; height: 22px;
-    cursor: pointer; font-size: 12px; font-weight: 700;
-    display: none;
-}
-.image-upload-box:hover .image-remove { display: flex; align-items: center; justify-content: center; }
+/* QUESTION CARD */
+.question-card{background:#f8f9fa;border:2px solid #e9ecef;border-radius:12px;padding:20px;margin-bottom:16px;position:relative}
+.question-number{background:#2c5aa0;color:#fff;padding:6px 16px;border-radius:20px;font-weight:700;font-size:13px;display:inline-block;margin-bottom:12px}
 
-.answer-options { display: flex; gap: 12px; margin: 12px 0; }
-.answer-option {
-    flex: 1; padding: 12px 20px; border: 3px solid #e9ecef;
-    border-radius: 25px; text-align: center; cursor: pointer;
-    font-weight: 600; font-size: 14px; transition: all 0.2s;
-    background: white;
-}
-.answer-option:hover { border-color: #2c5aa0; }
-.answer-option.selected-gut { border-color: #28a745; background: #d4edda; color: #155724; }
-.answer-option.selected-nicht-gut { border-color: #dc3545; background: #f8d7da; color: #721c24; }
+/* IMAGES */
+.images-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin:12px 0}
+.image-box{border:3px dashed #ced4da;border-radius:10px;height:130px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;background:#fff;transition:all .2s}
+.image-box:hover{border-color:#2c5aa0;background:#e8f0fe}
+.image-box img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}
+.image-box .ph{color:#6c757d;font-size:12px;text-align:center;padding:8px}
+.img-rm{position:absolute;top:4px;right:4px;background:#dc3545;color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;font-weight:700;display:none}
+.image-box:hover .img-rm{display:flex;align-items:center;justify-content:center}
 
-/* ========== TEST-DURCHFUEHRUNG ========== */
-.timer-bar {
-    background: linear-gradient(135deg, #6f42c1, #5a32a3);
-    color: white; padding: 12px 20px; border-radius: 10px;
-    text-align: center; font-weight: 700; font-size: 18px;
-    margin-bottom: 20px;
-}
-.progress-bar-wrapper {
-    background: #e9ecef; border-radius: 10px; height: 16px;
-    overflow: hidden; margin-bottom: 20px;
-}
-.progress-bar-fill {
-    background: linear-gradient(90deg, #28a745, #20c997);
-    height: 100%; transition: width 0.3s; display: flex;
-    align-items: center; justify-content: center;
-    color: white; font-size: 11px; font-weight: 700;
-}
-.operator-images {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-    margin: 16px 0;
-}
-.operator-image-box {
-    border: 2px solid #e9ecef; border-radius: 12px;
-    overflow: hidden; cursor: zoom-in; background: #f8f9fa;
-    transition: all 0.2s; position: relative;
-}
-.operator-image-box:hover { border-color: #2c5aa0; box-shadow: 0 4px 12px rgba(44,90,160,0.15); }
-.operator-image-box img { width: 100%; height: 180px; object-fit: contain; display: block; }
-.comment-field {
-    width: 100%; padding: 10px 14px; border: 2px solid #dee2e6;
-    border-radius: 8px; font-size: 13px; font-family: inherit;
-    resize: vertical; min-height: 50px; margin-top: 10px;
-}
-.comment-field:focus { outline: none; border-color: #2c5aa0; }
+/* ANSWER OPTIONS */
+.answer-options{display:flex;gap:12px;margin:12px 0}
+.answer-option{flex:1;padding:12px 20px;border:3px solid #e9ecef;border-radius:25px;text-align:center;cursor:pointer;font-weight:600;font-size:14px;transition:all .2s;background:#fff}
+.answer-option:hover{border-color:#2c5aa0}
+.answer-option.sel-gut{border-color:#28a745;background:#d4edda;color:#155724}
+.answer-option.sel-nio{border-color:#dc3545;background:#f8d7da;color:#721c24}
 
-/* ========== ERGEBNISSE ========== */
-.result-card {
-    background: white; border: 2px solid #e9ecef; border-radius: 12px;
-    padding: 16px; margin-bottom: 12px;
-}
-.result-card.passed { border-left: 5px solid #28a745; }
-.result-card.failed { border-left: 5px solid #dc3545; }
-.result-score { font-size: 24px; font-weight: 700; }
-.score-pass { color: #28a745; }
-.score-fail { color: #dc3545; }
+/* DEFECT CHIPS (NEU: vordefinierte Fehlerkategorien) */
+.defect-section{margin:12px 0;padding:12px;background:#fff;border-radius:8px;border:1px solid #e9ecef;display:none}
+.defect-section.visible{display:block}
+.defect-section-title{font-weight:600;font-size:13px;color:#dc3545;margin-bottom:8px}
+.defect-grid{display:flex;flex-wrap:wrap;gap:6px}
+.defect-chip{padding:6px 12px;border:2px solid #dee2e6;border-radius:20px;font-size:12px;cursor:pointer;transition:all .15s;background:#f8f9fa;user-select:none}
+.defect-chip:hover{border-color:#dc3545}
+.defect-chip.selected{border-color:#dc3545;background:#f8d7da;color:#721c24;font-weight:600}
+.defect-category-label{font-size:11px;font-weight:700;color:#6c757d;margin:8px 0 4px;text-transform:uppercase;letter-spacing:.5px}
+.defect-category-label:first-child{margin-top:0}
 
-/* ========== UNTERSCHRIFT ========== */
-.signature-area { margin: 16px 0; }
-.signature-canvas {
-    border: 2px solid #2c5aa0; border-radius: 8px;
-    cursor: crosshair; background: white; width: 100%;
-    height: 100px; touch-action: none;
-}
-.signature-label { font-weight: 600; font-size: 13px; margin-bottom: 6px; color: #495057; }
-.clear-sig-btn {
-    background: #ffc107; border: none; padding: 5px 14px;
-    border-radius: 6px; font-size: 11px; font-weight: 600;
-    cursor: pointer; margin-top: 6px;
-}
+/* COMMENT */
+.comment-field{width:100%;padding:10px 14px;border:2px solid #dee2e6;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:40px;margin-top:8px}
+.comment-field:focus{outline:none;border-color:#2c5aa0}
+.comment-field.required-comment{border-color:#dc3545;background:#fff5f5}
 
-/* ========== MODAL (BILD-ZOOM) ========== */
-.modal-overlay {
-    display: none; position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%; background: rgba(0,0,0,0.9);
-    z-index: 1000; justify-content: center; align-items: center;
-}
-.modal-overlay.open { display: flex; }
-.modal-close {
-    position: absolute; top: 16px; right: 24px;
-    color: white; font-size: 36px; cursor: pointer;
-    background: none; border: none; z-index: 1001;
-}
-.modal-overlay img { max-width: 92%; max-height: 90vh; object-fit: contain; }
+/* TIMER */
+.timer-bar{background:linear-gradient(135deg,#6f42c1,#5a32a3);color:#fff;padding:12px 20px;border-radius:10px;text-align:center;font-weight:700;font-size:18px;margin-bottom:20px}
+.progress-bar-wrapper{background:#e9ecef;border-radius:10px;height:16px;overflow:hidden;margin-bottom:20px}
+.progress-bar-fill{background:linear-gradient(90deg,#28a745,#20c997);height:100%;transition:width .3s;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
 
-/* ========== RESPONSIVE ========== */
-@media (max-width: 768px) {
-    .container { padding: 12px; }
-    .navbar { padding: 10px 16px; flex-direction: column; gap: 8px; }
-    .login-card { margin: 16px; padding: 24px; }
-    .role-selector { flex-direction: column; }
-    .dashboard-grid { grid-template-columns: 1fr; }
-    .answer-options { flex-direction: column; }
-    .signature-grid { grid-template-columns: 1fr !important; }
-}
+/* OPERATOR IMAGES */
+.op-images{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:16px 0}
+.op-img{border:2px solid #e9ecef;border-radius:12px;overflow:hidden;cursor:zoom-in;background:#f8f9fa;transition:all .2s;position:relative}
+.op-img:hover{border-color:#2c5aa0;box-shadow:0 4px 12px rgba(44,90,160,.15)}
+.op-img img{width:100%;height:180px;object-fit:contain;display:block}
 
-/* ========== DRUCK/PDF ========== */
-@media print {
-    .navbar, .btn, .btn-group, .no-print { display: none !important; }
-    body { background: white; padding: 0; }
-    .container { max-width: none; padding: 0; }
-    .card { box-shadow: none; border: 1pt solid #ccc; page-break-inside: avoid; }
-    .question-card { page-break-before: always; }
-    .question-card:first-child { page-break-before: avoid; }
-}
+/* RESULTS */
+.result-card{background:#fff;border:2px solid #e9ecef;border-radius:12px;padding:16px;margin-bottom:12px}
+.result-card.passed{border-left:5px solid #28a745}
+.result-card.failed{border-left:5px solid #dc3545}
+.result-score{font-size:24px;font-weight:700}
+.score-pass{color:#28a745}.score-fail{color:#dc3545}
 
-/* ========== LADEN ========== */
-.loading {
-    text-align: center; padding: 40px; color: #6c757d;
-}
-.spinner {
-    border: 4px solid #e9ecef; border-top: 4px solid #2c5aa0;
-    border-radius: 50%; width: 36px; height: 36px;
-    animation: spin 0.8s linear infinite; margin: 0 auto 16px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+/* SIGNATURE */
+.sig-area{margin:16px 0}
+.sig-canvas{border:2px solid #2c5aa0;border-radius:8px;cursor:crosshair;background:#fff;width:100%;height:100px;touch-action:none}
+.sig-label{font-weight:600;font-size:13px;margin-bottom:6px;color:#495057}
+.sig-label .req{color:#dc3545}
+.clear-sig{background:#ffc107;border:none;padding:5px 14px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px}
 
-/* ========== HILFSKLASSEN ========== */
-.text-center { text-align: center; }
-.text-muted { color: #6c757d; }
-.mt-1 { margin-top: 8px; }
-.mt-2 { margin-top: 16px; }
-.mt-3 { margin-top: 24px; }
-.mb-1 { margin-bottom: 8px; }
-.mb-2 { margin-bottom: 16px; }
-.mb-3 { margin-bottom: 24px; }
-.gap-1 { gap: 8px; }
-.gap-2 { gap: 16px; }
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-between { justify-content: space-between; }
-.flex-wrap { flex-wrap: wrap; }
-.hidden { display: none !important; }
+/* WARNING */
+.warning-box{background:#fff3cd;border:1px solid #ffc107;color:#856404;padding:12px 16px;border-radius:8px;margin:12px 0;font-size:13px;font-weight:600}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:1000;justify-content:center;align-items:center}
+.modal-overlay.open{display:flex}
+.modal-close{position:absolute;top:16px;right:24px;color:#fff;font-size:36px;cursor:pointer;background:none;border:none;z-index:1001}
+.modal-overlay img{max-width:92%;max-height:90vh;object-fit:contain}
+
+/* USER MANAGEMENT */
+.user-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #e9ecef}
+.user-row:last-child{border:0}
+
+/* EXPLANATION */
+.explanation-box{margin-top:8px;padding:10px;background:#e8f0fe;border-radius:6px;font-size:12px;color:#1e3a5f;border-left:3px solid #2c5aa0}
+.explanation-box.wrong{background:#fff3cd;border-left-color:#ffc107;color:#856404}
+.explanation-box.correct{background:#d4edda;border-left-color:#28a745;color:#155724}
+
+/* RESPONSIVE */
+@media(max-width:768px){.container{padding:12px}.navbar{padding:10px 16px;flex-direction:column;gap:8px}.login-card{margin:16px;padding:24px}.role-selector{flex-direction:column}.dashboard-grid{grid-template-columns:1fr}.answer-options{flex-direction:column}.sig-grid-2{grid-template-columns:1fr!important}}
+
+/* PRINT */
+@media print{.navbar,.btn,.btn-group,.no-print{display:none!important}body{background:#fff;padding:0}.container{max-width:none;padding:0}.card{box-shadow:none;border:1pt solid #ccc;page-break-inside:avoid}.question-card{page-break-before:always}.question-card:first-child{page-break-before:avoid}}
+
+/* LOADING */
+.loading{text-align:center;padding:40px;color:#6c757d}
+.spinner{border:4px solid #e9ecef;border-top:4px solid #2c5aa0;border-radius:50%;width:36px;height:36px;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* HELPERS */
+.text-center{text-align:center}.text-muted{color:#6c757d}
+.mt-1{margin-top:8px}.mt-2{margin-top:16px}.mt-3{margin-top:24px}
+.mb-1{margin-bottom:8px}.mb-2{margin-bottom:16px}.mb-3{margin-bottom:24px}
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}
+.justify-between{justify-content:space-between}.flex-wrap{flex-wrap:wrap}
+.gap-1{gap:8px}.gap-2{gap:16px}
+.hidden{display:none!important}
+.w100{width:100%}
     </style>
 </head>
 <body>
 
-<!-- ===================== LOGIN SEITE ===================== -->
+<!-- ==================== LOGIN ==================== -->
 <div id="viewLogin" class="view active">
     <div class="login-wrapper">
         <div class="login-card">
             <div class="login-logo">
-                <svg width="60" height="60" viewBox="0 0 60 60">
-                    <rect x="5" y="5" width="50" height="50" rx="8" fill="#2c5aa0"/>
-                    <text x="30" y="38" text-anchor="middle" fill="white" font-size="24" font-weight="bold">A</text>
-                </svg>
+                <svg width="60" height="60" viewBox="0 0 60 60"><rect x="5" y="5" width="50" height="50" rx="8" fill="#2c5aa0"/><text x="30" y="38" text-anchor="middle" fill="#fff" font-size="24" font-weight="bold">A</text></svg>
             </div>
             <div class="login-title">AOI-Test-System</div>
             <div class="login-subtitle">Asetronics AG - Leiterplatten-Qualitaetskontrolle</div>
 
             <div class="form-group">
-                <label class="form-label">Name</label>
+                <label class="form-label">Name <span class="req">*</span></label>
                 <input type="text" id="loginName" class="form-input" placeholder="Vor- und Nachname" autocomplete="name">
             </div>
             <div class="form-group">
-                <label class="form-label">Mitarbeiternummer</label>
+                <label class="form-label">Mitarbeiternummer <span class="req">*</span></label>
                 <input type="text" id="loginNumber" class="form-input" placeholder="z.B. 12345" autocomplete="off">
             </div>
             <div class="form-group">
-                <label class="form-label">Rolle</label>
+                <label class="form-label">Rolle <span class="req">*</span></label>
                 <div class="role-selector">
                     <div class="role-option" id="rolePruefer" onclick="selectRole('pruefer')">
-                        <div class="role-option-icon">[Pr]</div>
-                        <div class="role-option-text">Pruefer</div>
-                        <div class="role-option-desc">Tests erstellen und auswerten</div>
+                        <div class="role-icon">[Pr]</div>
+                        <div class="role-text">Pruefer</div>
+                        <div class="role-desc">Tests erstellen und auswerten</div>
                     </div>
                     <div class="role-option" id="roleOperator" onclick="selectRole('operator')">
-                        <div class="role-option-icon">[Op]</div>
-                        <div class="role-option-text">Operator</div>
-                        <div class="role-option-desc">Tests durchfuehren</div>
+                        <div class="role-icon">[Op]</div>
+                        <div class="role-text">Operator</div>
+                        <div class="role-desc">Tests durchfuehren</div>
                     </div>
                 </div>
             </div>
 
-            <button class="btn btn-primary btn-block btn-lg mt-2" onclick="doLogin()" id="loginBtn" disabled>
-                Anmelden
-            </button>
-            <div id="loginError" class="text-center text-muted mt-1" style="font-size:13px;color:#dc3545;"></div>
+            <button class="btn btn-primary btn-block btn-lg mt-2" onclick="doLogin()" id="loginBtn" disabled>Anmelden</button>
+            <div id="loginMsg" class="text-center mt-1" style="font-size:13px;"></div>
         </div>
     </div>
 </div>
 
-<!-- ===================== NAVIGATION (nach Login) ===================== -->
+<!-- ==================== NAVBAR ==================== -->
 <div id="mainNavbar" class="navbar hidden">
     <div class="navbar-brand">
-        <svg width="32" height="32" viewBox="0 0 60 60">
-            <rect x="5" y="5" width="50" height="50" rx="8" fill="white" fill-opacity="0.2"/>
-            <text x="30" y="38" text-anchor="middle" fill="white" font-size="24" font-weight="bold">A</text>
-        </svg>
+        <svg viewBox="0 0 60 60"><rect x="5" y="5" width="50" height="50" rx="8" fill="rgba(255,255,255,.2)"/><text x="30" y="38" text-anchor="middle" fill="#fff" font-size="24" font-weight="bold">A</text></svg>
         <span>AOI-Test-System</span>
     </div>
     <div class="navbar-user">
@@ -460,1218 +239,827 @@ body {
     </div>
 </div>
 
-<!-- ===================== PRUEFER: DASHBOARD ===================== -->
-<div id="viewPrueferDashboard" class="view">
+<!-- ==================== PRUEFER DASHBOARD ==================== -->
+<div id="viewPruefer" class="view">
     <div class="container">
         <div class="card">
             <div class="card-header">Pruefer-Dashboard</div>
-            <div class="btn-group mb-2">
+            <div class="btn-group">
                 <button class="btn btn-primary" onclick="showCreateTest()">+ Neuen Test erstellen</button>
-                <button class="btn btn-secondary" onclick="showPrueferResults()">Ergebnisse ansehen</button>
+                <button class="btn btn-secondary" onclick="showPrueferResults()">Ergebnisse</button>
+                <button class="btn btn-outline" onclick="showUserMgmt()">Benutzer verwalten</button>
             </div>
         </div>
-        <div id="prueferTestList" class="dashboard-grid">
-            <div class="loading"><div class="spinner"></div>Tests werden geladen...</div>
+        <div id="prueferTestList" class="dashboard-grid"><div class="loading"><div class="spinner"></div>Laden...</div></div>
+    </div>
+</div>
+
+<!-- ==================== PRUEFER: BENUTZER VERWALTUNG ==================== -->
+<div id="viewUserMgmt" class="view">
+    <div class="container">
+        <div class="card">
+            <div class="flex justify-between items-center mb-2">
+                <div class="card-header" style="margin:0;border:0;padding:0">Benutzer verwalten</div>
+                <button class="btn btn-secondary btn-sm" onclick="showPrueferDashboard()">Zurueck</button>
+            </div>
+            <p class="text-muted mb-2" style="font-size:13px;">Hier koennen Sie Operatoren registrieren. Nur registrierte Operatoren koennen sich anmelden.</p>
+            <div class="card" style="background:#f8f9fa;">
+                <div class="form-group">
+                    <label class="form-label">Neuen Operator registrieren</label>
+                    <div class="flex gap-1 flex-wrap">
+                        <input type="text" id="newUserName" class="form-input" placeholder="Name" style="max-width:200px">
+                        <input type="text" id="newUserNumber" class="form-input" placeholder="Mitnr." style="max-width:120px">
+                        <button class="btn btn-success" onclick="registerOperator()">Registrieren</button>
+                    </div>
+                </div>
+            </div>
+            <div id="userList" class="mt-2"><div class="loading"><div class="spinner"></div></div></div>
         </div>
     </div>
 </div>
 
-<!-- ===================== PRUEFER: TEST ERSTELLEN/BEARBEITEN ===================== -->
+<!-- ==================== PRUEFER: TEST ERSTELLEN ==================== -->
 <div id="viewCreateTest" class="view">
     <div class="container">
         <div class="card">
             <div class="flex justify-between items-center mb-2">
-                <div class="card-header" style="margin:0;border:0;padding:0;" id="createTestTitle">Neuen Test erstellen</div>
+                <div class="card-header" style="margin:0;border:0;padding:0" id="ctTitle">Neuen Test erstellen</div>
                 <button class="btn btn-secondary btn-sm" onclick="showPrueferDashboard()">Zurueck</button>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Test-Titel</label>
-                <input type="text" id="testTitleInput" class="form-input" value="AOI-Beurteilungstest" placeholder="Titel eingeben">
+                <input type="text" id="testTitleIn" class="form-input" value="AOI-Beurteilungstest">
             </div>
             <div class="form-group">
                 <label class="form-label">Beschreibung</label>
-                <input type="text" id="testDescInput" class="form-input" value="Beurteilung nach IPC-A-610" placeholder="Beschreibung eingeben">
+                <input type="text" id="testDescIn" class="form-input" value="Beurteilung nach IPC-A-610">
             </div>
             <div class="form-group">
-                <label class="form-label">Mindestpunktzahl zum Bestehen</label>
-                <input type="number" id="testPassScore" class="form-input" value="24" min="0" style="max-width:120px;">
+                <label class="form-label">Mindestpunktzahl</label>
+                <input type="number" id="testPassIn" class="form-input" value="24" min="0" style="max-width:120px">
             </div>
         </div>
-
         <div class="card">
             <div class="flex justify-between items-center mb-2">
-                <div class="card-header" style="margin:0;border:0;padding:0;">Fragen</div>
+                <div class="card-header" style="margin:0;border:0;padding:0">Fragen</div>
                 <div class="flex gap-1 items-center">
-                    <input type="number" id="addQuestionsCount" value="1" min="1" max="50" style="width:60px;padding:8px;border:2px solid #2c5aa0;border-radius:6px;text-align:center;font-size:14px;">
+                    <input type="number" id="addQCount" value="1" min="1" max="50" style="width:60px;padding:8px;border:2px solid #2c5aa0;border-radius:6px;text-align:center;font-size:14px">
                     <button class="btn btn-primary btn-sm" onclick="addQuestions()">Fragen hinzufuegen</button>
                 </div>
             </div>
-            <div id="questionsContainer"></div>
+            <div id="editQContainer"></div>
         </div>
-
         <div class="btn-group mt-2">
-            <button class="btn btn-success btn-lg" onclick="saveTest()" id="saveTestBtn">Test speichern</button>
+            <button class="btn btn-success btn-lg" onclick="saveTest()">Test speichern</button>
             <button class="btn btn-secondary" onclick="showPrueferDashboard()">Abbrechen</button>
         </div>
     </div>
 </div>
 
-<!-- ===================== PRUEFER: ERGEBNISSE ===================== -->
+<!-- ==================== PRUEFER: ERGEBNISSE ==================== -->
 <div id="viewPrueferResults" class="view">
     <div class="container">
         <div class="card">
             <div class="flex justify-between items-center mb-2">
-                <div class="card-header" style="margin:0;border:0;padding:0;">Alle Testergebnisse</div>
-                <div class="btn-group">
-                    <button class="btn btn-secondary btn-sm" onclick="showPrueferDashboard()">Zurueck</button>
-                </div>
+                <div class="card-header" style="margin:0;border:0;padding:0">Alle Testergebnisse</div>
+                <button class="btn btn-secondary btn-sm" onclick="showPrueferDashboard()">Zurueck</button>
             </div>
             <div id="prueferResultsList"></div>
         </div>
     </div>
 </div>
 
-<!-- ===================== OPERATOR: TEST-LISTE ===================== -->
-<div id="viewOperatorTests" class="view">
+<!-- ==================== OPERATOR: TEST LISTE ==================== -->
+<div id="viewOpTests" class="view">
     <div class="container">
         <div class="card">
             <div class="card-header">Verfuegbare Tests</div>
-            <div id="operatorTestList" class="dashboard-grid">
-                <div class="loading"><div class="spinner"></div>Tests werden geladen...</div>
-            </div>
+            <div id="opTestList" class="dashboard-grid"><div class="loading"><div class="spinner"></div>Laden...</div></div>
         </div>
-        <div class="card mt-2" id="operatorHistoryCard" style="display:none;">
+        <div class="card mt-2" id="opHistoryCard" style="display:none">
             <div class="card-header">Meine bisherigen Ergebnisse</div>
-            <div id="operatorHistory"></div>
+            <div id="opHistory"></div>
         </div>
     </div>
 </div>
 
-<!-- ===================== OPERATOR: TEST DURCHFUEHREN ===================== -->
+<!-- ==================== OPERATOR: TEST DURCHFUEHREN ==================== -->
 <div id="viewTakeTest" class="view">
     <div class="container">
         <div class="card">
             <div class="flex justify-between items-center mb-2">
-                <div class="card-header" style="margin:0;border:0;padding:0;" id="takeTestTitle">Test</div>
-                <button class="btn btn-danger btn-sm" onclick="cancelTest()">Test abbrechen</button>
+                <div class="card-header" style="margin:0;border:0;padding:0" id="takeTitle">Test</div>
+                <button class="btn btn-danger btn-sm" onclick="cancelTest()">Abbrechen</button>
             </div>
             <div class="timer-bar" id="testTimer">Benoetigte Zeit: 00:00:00</div>
             <div class="progress-bar-wrapper">
                 <div class="progress-bar-fill" id="testProgress" style="width:0%">0%</div>
             </div>
-            <div id="testQuestionsContainer"></div>
+            <div id="warningBox" class="warning-box" style="display:none"></div>
+            <div id="takeQContainer"></div>
         </div>
-
-        <div class="card mt-2" id="signatureSection" style="display:none;">
-            <div class="card-header">Unterschriften</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;" class="signature-grid">
-                <div class="signature-area">
-                    <div class="signature-label">Unterschrift Mitarbeiter</div>
-                    <canvas class="signature-canvas" id="sigOperator" width="400" height="100"></canvas>
-                    <button class="clear-sig-btn" onclick="clearSig('sigOperator')">Loschen</button>
+        <div class="card mt-2" id="sigSection" style="display:none">
+            <div class="card-header">Unterschriften <span class="req" style="color:#dc3545">*</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px" class="sig-grid-2">
+                <div class="sig-area">
+                    <div class="sig-label">Unterschrift Mitarbeiter <span class="req">*</span></div>
+                    <canvas class="sig-canvas" id="sigOp" width="400" height="100"></canvas>
+                    <button class="clear-sig" onclick="clearSig('sigOp')">Loschen</button>
                 </div>
-                <div class="signature-area">
-                    <div class="signature-label">Unterschrift Pruefer/Ausbilder</div>
-                    <canvas class="signature-canvas" id="sigExaminer" width="400" height="100"></canvas>
-                    <button class="clear-sig-btn" onclick="clearSig('sigExaminer')">Loschen</button>
+                <div class="sig-area">
+                    <div class="sig-label">Unterschrift Pruefer</div>
+                    <canvas class="sig-canvas" id="sigEx" width="400" height="100"></canvas>
+                    <button class="clear-sig" onclick="clearSig('sigEx')">Loschen</button>
                 </div>
             </div>
         </div>
-
-        <div class="btn-group mt-2" id="testActionBtns">
+        <div class="btn-group mt-2 no-print">
             <button class="btn btn-danger btn-lg" onclick="finalizeTest()" id="finalizeBtn" disabled>Test abschliessen</button>
         </div>
     </div>
 </div>
 
-<!-- ===================== ERGEBNIS-ANZEIGE ===================== -->
+<!-- ==================== ERGEBNIS ANZEIGE ==================== -->
 <div id="viewResult" class="view">
     <div class="container" id="resultContainer">
         <div class="card" id="resultCard"></div>
         <div class="btn-group mt-2 no-print">
-            <button class="btn btn-primary" onclick="exportResultPDF()">Als PDF exportieren</button>
-            <button class="btn btn-secondary" onclick="goBackAfterResult()">Zurueck</button>
+            <button class="btn btn-primary" onclick="exportPDF()">Als PDF exportieren</button>
+            <button class="btn btn-secondary" onclick="goBack()">Zurueck</button>
         </div>
     </div>
 </div>
 
-<!-- ===================== BILD-MODAL ===================== -->
-<div class="modal-overlay" id="imageModal">
-    <button class="modal-close" onclick="closeImageModal()">&times;</button>
-    <img id="modalImage" src="" alt="Zoom">
+<!-- MODAL -->
+<div class="modal-overlay" id="imgModal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <img id="modalImg" src="" alt="Zoom">
 </div>
 
-<!-- ===================== JAVASCRIPT ===================== -->
 <script>
 // ============================================================
-// SUPABASE KONFIGURATION
+// CONFIG
 // ============================================================
-const SUPABASE_URL = 'https://yrephxnnkifrmwkqyzsa.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_nFZwPKhntA1nzMbcqWJfUg_I9JyM7WD';
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// ============================================================
-// GLOBALER ZUSTAND
-// ============================================================
-let currentUser = null;
-let currentRole = null;
-let selectedRole = null;
-
-// Test-Erstellung Zustand
-let editTestId = null;
-let editQuestions = [];
-let editQuestionCounter = 0;
-
-// Test-Durchfuehrung Zustand
-let activeTest = null;
-let activeTestQuestions = [];
-let activeTestImages = {};
-let activeTestAnswers = {};
-let activeResultId = null;
-let timerInterval = null;
-let timerSeconds = 0;
+const SB_URL = 'https://yrephxnnkifrmwkqyzsa.supabase.co';
+const SB_KEY = 'sb_publishable_nFZwPKhntA1nzMbcqWJfUg_I9JyM7WD';
+const db = window.supabase.createClient(SB_URL, SB_KEY);
 
 // ============================================================
-// HILFSFUNKTIONEN
+// STATE
 // ============================================================
-function showView(viewId) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    const el = document.getElementById(viewId);
-    if (el) el.classList.add('active');
-}
+let me = null, myRole = null, selRole = null;
+let editId = null, eqs = [], eqCnt = 0;
+let aTest = null, aQuestions = [], aImages = {}, aAnswers = {}, aResultId = null;
+let tInterval = null, tSeconds = 0;
 
-function formatTime(seconds) {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-}
+// VORDEFINIERTE FEHLERKATEGORIEN
+const DEFECTS = {
+    'Loetfehler': ['Kalte Loetstelle','Zu viel Lot','Zu wenig Lot','Lotbruecke'],
+    'Platzierung': ['Bauteil fehlt','Bauteil verdreht','Bauteil verschoben','Falsches Bauteil','Bauteil gekippt'],
+    'Reinigung': ['Flux-Reste','Kontamination'],
+    'Mechanisch': ['LP beschaedigt','Leiterbahn defekt'],
+    'Polaritaet': ['Pol falsch'],
+    'Sonstiges': ['Beschriftung fehlt','Sonstiger Fehler']
+};
 
-function formatDate(iso) {
-    if (!iso) return '-';
-    return new Date(iso).toLocaleDateString('de-CH', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-}
+// ============================================================
+// HELPERS
+// ============================================================
+function $(id){ return document.getElementById(id) }
+function showView(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); if($(id)) $(id).classList.add('active') }
+function fmtTime(s){ const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0') }
+function fmtDate(iso){ if(!iso) return '-'; return new Date(iso).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) }
 
 // ============================================================
 // LOGIN
 // ============================================================
-function selectRole(role) {
-    selectedRole = role;
-    document.getElementById('rolePruefer').className = 'role-option' + (role === 'pruefer' ? ' selected-pruefer' : '');
-    document.getElementById('roleOperator').className = 'role-option' + (role === 'operator' ? ' selected-operator' : '');
-    checkLoginForm();
+function selectRole(r){
+    selRole = r;
+    $('rolePruefer').className = 'role-option'+(r==='pruefer'?' sel-p':'');
+    $('roleOperator').className = 'role-option'+(r==='operator'?' sel-o':'');
+    checkLogin();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('loginName').addEventListener('input', checkLoginForm);
-    document.getElementById('loginNumber').addEventListener('input', checkLoginForm);
-});
-
-function checkLoginForm() {
-    const name = document.getElementById('loginName').value.trim();
-    const num = document.getElementById('loginNumber').value.trim();
-    const btn = document.getElementById('loginBtn');
-    btn.disabled = !(name && num && selectedRole);
+function checkLogin(){
+    const n=$('loginName').value.trim(), num=$('loginNumber').value.trim();
+    $('loginBtn').disabled = !(n && num && selRole);
 }
 
-async function doLogin() {
-    const name = document.getElementById('loginName').value.trim();
-    const num = document.getElementById('loginNumber').value.trim();
-    const errEl = document.getElementById('loginError');
-
-    if (!name || !num || !selectedRole) {
-        errEl.textContent = 'Bitte alle Felder ausfuellen und eine Rolle waehlen.';
-        return;
-    }
+async function doLogin(){
+    const name = $('loginName').value.trim();
+    const num = $('loginNumber').value.trim();
+    const msg = $('loginMsg');
+    if(!name||!num||!selRole){ msg.style.color='#dc3545'; msg.textContent='Bitte alle Felder ausfuellen.'; return; }
 
     try {
-        // Pruefen ob Benutzer schon existiert
-        const { data: existing } = await db
-            .from('users')
-            .select('*')
-            .eq('name', name)
-            .eq('employee_number', num)
-            .single();
+        const {data: existing} = await db.from('users').select('*').eq('name',name).eq('employee_number',num).single();
 
-        if (existing) {
-            currentUser = existing;
+        if(selRole === 'operator'){
+            // Operator MUSS vom Pruefer registriert sein
+            if(!existing){
+                msg.style.color='#dc3545';
+                msg.textContent='Sie sind nicht registriert. Bitten Sie einen Pruefer, Sie zu registrieren.';
+                return;
+            }
+            if(existing.role !== 'operator'){
+                msg.style.color='#dc3545';
+                msg.textContent='Sie sind als Pruefer registriert, nicht als Operator.';
+                return;
+            }
+            me = existing;
         } else {
-            // Neuen Benutzer anlegen
-            const { data, error } = await db
-                .from('users')
-                .insert({ name: name, employee_number: num, role: selectedRole })
-                .select()
-                .single();
-            if (error) throw error;
-            currentUser = data;
+            // Pruefer: neu registrieren oder einloggen
+            if(existing){
+                if(existing.role !== 'pruefer'){
+                    msg.style.color='#dc3545';
+                    msg.textContent='Dieser Benutzer ist als Operator registriert.';
+                    return;
+                }
+                me = existing;
+            } else {
+                const {data, error} = await db.from('users').insert({name, employee_number:num, role:'pruefer'}).select().single();
+                if(error) throw error;
+                me = data;
+            }
         }
 
-        currentRole = selectedRole;
+        myRole = selRole;
+        $('mainNavbar').classList.remove('hidden');
+        $('navUserName').textContent = me.name;
+        const rEl = $('navUserRole');
+        rEl.textContent = myRole==='pruefer'?'Pruefer':'Operator';
+        rEl.className = 'navbar-role '+(myRole==='pruefer'?'role-pruefer':'role-operator');
+        msg.textContent = '';
 
-        // Navigation anzeigen
-        document.getElementById('mainNavbar').classList.remove('hidden');
-        document.getElementById('navUserName').textContent = currentUser.name;
-        const roleEl = document.getElementById('navUserRole');
-        roleEl.textContent = currentRole === 'pruefer' ? 'Pruefer' : 'Operator';
-        roleEl.className = 'navbar-role ' + (currentRole === 'pruefer' ? 'role-pruefer' : 'role-operator');
-
-        errEl.textContent = '';
-
-        // Zur richtigen Ansicht
-        if (currentRole === 'pruefer') {
-            showPrueferDashboard();
-        } else {
-            showOperatorTests();
-        }
-    } catch (err) {
-        console.error('Login-Fehler:', err);
-        errEl.textContent = 'Fehler bei der Anmeldung: ' + err.message;
+        if(myRole==='pruefer') showPrueferDashboard(); else showOpTests();
+    } catch(err){
+        console.error(err);
+        msg.style.color='#dc3545';
+        msg.textContent = 'Fehler: '+err.message;
     }
 }
 
-function doLogout() {
-    currentUser = null;
-    currentRole = null;
-    selectedRole = null;
-    document.getElementById('mainNavbar').classList.add('hidden');
-    document.getElementById('loginName').value = '';
-    document.getElementById('loginNumber').value = '';
-    document.getElementById('loginBtn').disabled = true;
-    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+function doLogout(){
+    me=null; myRole=null; selRole=null;
+    $('mainNavbar').classList.add('hidden');
+    $('loginName').value=''; $('loginNumber').value=''; $('loginBtn').disabled=true;
+    if(tInterval){clearInterval(tInterval);tInterval=null}
     showView('viewLogin');
 }
 
+document.addEventListener('DOMContentLoaded',()=>{
+    $('loginName').addEventListener('input',checkLogin);
+    $('loginNumber').addEventListener('input',checkLogin);
+});
+
 // ============================================================
-// PRUEFER: DASHBOARD
+// PRUEFER DASHBOARD
 // ============================================================
-async function showPrueferDashboard() {
-    showView('viewPrueferDashboard');
-    await loadPrueferTests();
-}
+async function showPrueferDashboard(){ showView('viewPruefer'); await loadTests() }
 
-async function loadPrueferTests() {
-    const container = document.getElementById('prueferTestList');
-    container.innerHTML = '<div class="loading"><div class="spinner"></div>Laden...</div>';
+async function loadTests(){
+    const c=$('prueferTestList'); c.innerHTML='<div class="loading"><div class="spinner"></div>Laden...</div>';
+    try{
+        const {data:tests,error}=await db.from('tests').select('*').order('created_at',{ascending:false});
+        if(error) throw error;
+        if(!tests||!tests.length){ c.innerHTML='<div class="card text-center text-muted">Noch keine Tests. Klicken Sie auf "Neuen Test erstellen".</div>'; return }
 
-    try {
-        const { data: tests, error } = await db
-            .from('tests')
-            .select('*')
-            .order('created_at', { ascending: false });
+        const {data:qc}=await db.from('questions').select('test_id');
+        const cm={}; if(qc) qc.forEach(q=>cm[q.test_id]=(cm[q.test_id]||0)+1);
 
-        if (error) throw error;
-
-        if (!tests || tests.length === 0) {
-            container.innerHTML = '<div class="card text-center text-muted">Noch keine Tests erstellt. Klicken Sie auf "Neuen Test erstellen".</div>';
-            return;
-        }
-
-        // Frageanzahl fuer jeden Test laden
-        const { data: questionCounts } = await db
-            .from('questions')
-            .select('test_id');
-
-        const countMap = {};
-        if (questionCounts) {
-            questionCounts.forEach(q => {
-                countMap[q.test_id] = (countMap[q.test_id] || 0) + 1;
-            });
-        }
-
-        container.innerHTML = tests.map(t => `
-            <div class="test-card ${t.is_active ? '' : 'inactive'}">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <div class="test-title">${t.title}</div>
-                        <div class="test-meta">
-                            <span>${(countMap[t.id] || 0)} Fragen</span>
-                            <span>Mindest: ${t.passing_score} Punkte</span>
-                            <span class="test-badge ${t.is_active ? 'badge-active' : 'badge-inactive'}">${t.is_active ? 'Aktiv' : 'Inaktiv'}</span>
-                        </div>
-                        <div class="text-muted mt-1" style="font-size:11px;">Erstellt: ${formatDate(t.created_at)}</div>
-                    </div>
-                    <div class="btn-group" style="flex-direction:column;">
-                        <button class="btn btn-primary btn-sm" onclick="editTest('${t.id}')">Bearbeiten</button>
-                        <button class="btn btn-${t.is_active ? 'warning' : 'success'} btn-sm" onclick="toggleTestActive('${t.id}', ${!t.is_active})">${t.is_active ? 'Deaktivieren' : 'Aktivieren'}</button>
-                    </div>
+        c.innerHTML=tests.map(t=>`
+            <div class="test-card ${t.is_active?'':'inactive'}">
+                <div class="test-title">${t.title}</div>
+                <div class="test-meta"><span>${cm[t.id]||0} Fragen</span><span>Mindest: ${t.passing_score}</span><span class="test-badge ${t.is_active?'badge-active':'badge-inactive'}">${t.is_active?'Aktiv':'Inaktiv'}</span></div>
+                <div class="text-muted mt-1" style="font-size:11px">${fmtDate(t.created_at)}</div>
+                <div class="btn-group mt-1">
+                    <button class="btn btn-primary btn-sm" onclick="editTest('${t.id}')">Bearbeiten</button>
+                    <button class="btn btn-${t.is_active?'warning':'success'} btn-sm" onclick="toggleActive('${t.id}',${!t.is_active})">${t.is_active?'Deaktivieren':'Aktivieren'}</button>
                 </div>
-            </div>
-        `).join('');
-    } catch (err) {
-        container.innerHTML = '<div class="card text-center" style="color:#dc3545;">Fehler beim Laden: ' + err.message + '<br><br><small>Wahrscheinlich muss die Datenbank noch eingerichtet werden. Bitte setup.sql im Supabase SQL Editor ausfuehren.</small></div>';
-    }
+            </div>`).join('');
+    }catch(e){ c.innerHTML='<div class="card" style="color:#dc3545">Fehler: '+e.message+'</div>' }
 }
 
-async function toggleTestActive(testId, active) {
-    try {
-        const { error } = await db.from('tests').update({ is_active: active }).eq('id', testId);
-        if (error) throw error;
-        await loadPrueferTests();
-    } catch (err) {
-        alert('Fehler: ' + err.message);
-    }
+async function toggleActive(id,v){ try{await db.from('tests').update({is_active:v}).eq('id',id);await loadTests()}catch(e){alert(e.message)} }
+
+// ============================================================
+// BENUTZER VERWALTUNG
+// ============================================================
+async function showUserMgmt(){ showView('viewUserMgmt'); await loadUsers() }
+
+async function loadUsers(){
+    const c=$('userList'); c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+    try{
+        const {data:users}=await db.from('users').select('*').order('role').order('name');
+        if(!users||!users.length){ c.innerHTML='<div class="text-muted text-center">Keine Benutzer.</div>'; return }
+        c.innerHTML=users.map(u=>`
+            <div class="user-row">
+                <div><strong>${u.name}</strong> <span class="text-muted">(${u.employee_number})</span></div>
+                <div class="flex gap-1 items-center">
+                    <span class="test-badge ${u.role==='pruefer'?'badge-active':'badge-inactive'}">${u.role==='pruefer'?'Pruefer':'Operator'}</span>
+                    ${u.id!==me.id?`<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">Entfernen</button>`:''}
+                </div>
+            </div>`).join('');
+    }catch(e){c.innerHTML='<div style="color:#dc3545">'+e.message+'</div>'}
+}
+
+async function registerOperator(){
+    const name=$('newUserName').value.trim(), num=$('newUserNumber').value.trim();
+    if(!name||!num){alert('Bitte Name und Nummer eingeben.');return}
+    try{
+        const {data:exists}=await db.from('users').select('id').eq('employee_number',num).single();
+        if(exists){alert('Diese Mitarbeiternummer existiert bereits.');return}
+        await db.from('users').insert({name,employee_number:num,role:'operator'});
+        $('newUserName').value='';$('newUserNumber').value='';
+        await loadUsers();
+    }catch(e){alert('Fehler: '+e.message)}
+}
+
+async function deleteUser(id){
+    if(!confirm('Benutzer wirklich entfernen?'))return;
+    try{await db.from('users').delete().eq('id',id);await loadUsers()}catch(e){alert(e.message)}
 }
 
 // ============================================================
-// PRUEFER: TEST ERSTELLEN / BEARBEITEN
+// TEST ERSTELLEN / BEARBEITEN
 // ============================================================
-function showCreateTest() {
-    editTestId = null;
-    editQuestions = [];
-    editQuestionCounter = 0;
-    document.getElementById('testTitleInput').value = 'AOI-Beurteilungstest';
-    document.getElementById('testDescInput').value = 'Beurteilung nach IPC-A-610';
-    document.getElementById('testPassScore').value = '24';
-    document.getElementById('createTestTitle').textContent = 'Neuen Test erstellen';
-    document.getElementById('questionsContainer').innerHTML = '';
-    document.getElementById('saveTestBtn').textContent = 'Test speichern';
+function showCreateTest(){
+    editId=null;eqs=[];eqCnt=0;
+    $('testTitleIn').value='AOI-Beurteilungstest';$('testDescIn').value='Beurteilung nach IPC-A-610';$('testPassIn').value='24';
+    $('ctTitle').textContent='Neuen Test erstellen';$('editQContainer').innerHTML='';
     showView('viewCreateTest');
 }
 
-async function editTest(testId) {
-    try {
-        const { data: test, error } = await db.from('tests').select('*').eq('id', testId).single();
-        if (error) throw error;
+async function editTest(id){
+    try{
+        const {data:t}=await db.from('tests').select('*').eq('id',id).single();
+        editId=id;$('testTitleIn').value=t.title;$('testDescIn').value=t.description||'';$('testPassIn').value=t.passing_score;
+        $('ctTitle').textContent='Test bearbeiten';
 
-        editTestId = testId;
-        document.getElementById('testTitleInput').value = test.title;
-        document.getElementById('testDescInput').value = test.description || '';
-        document.getElementById('testPassScore').value = test.passing_score;
-        document.getElementById('createTestTitle').textContent = 'Test bearbeiten';
-        document.getElementById('saveTestBtn').textContent = 'Aenderungen speichern';
+        const {data:qs}=await db.from('questions').select('*').eq('test_id',id).order('question_number');
+        const qIds=(qs||[]).map(q=>q.id);
+        const {data:imgs}=await db.from('question_images').select('*').in('question_id',qIds);
+        const im={};if(imgs)imgs.forEach(i=>{if(!im[i.question_id])im[i.question_id]=[];im[i.question_id].push(i)});
 
-        // Fragen laden
-        const { data: questions } = await db.from('questions').select('*').eq('test_id', testId).order('question_number');
-        const { data: images } = await db.from('question_images').select('*').in('question_id', (questions || []).map(q => q.id));
+        eqs=[];eqCnt=0;$('editQContainer').innerHTML='';
+        if(qs)qs.forEach((q,i)=>{eqCnt++;eqs.push({tid:eqCnt,id:q.id,answer:q.correct_answer,explanation:q.explanation||'',images:(im[q.id]||[]).map(x=>({id:x.id,url:x.image_url}))})});
+        renderEditQ();showView('viewCreateTest');
+    }catch(e){alert(e.message)}
+}
 
-        const imageMap = {};
-        if (images) {
-            images.forEach(img => {
-                if (!imageMap[img.question_id]) imageMap[img.question_id] = [];
-                imageMap[img.question_id].push(img);
-            });
-        }
+function addQuestions(){
+    const n=parseInt($('addQCount').value)||1;
+    for(let i=0;i<n;i++){eqCnt++;eqs.push({tid:eqCnt,id:null,answer:null,explanation:'',images:[]})}
+    renderEditQ();
+}
 
-        editQuestions = [];
-        editQuestionCounter = 0;
-        document.getElementById('questionsContainer').innerHTML = '';
+function rmQ(tid){eqs=eqs.filter(q=>q.tid!==tid);eqs.forEach((q,i)=>q.tid=i+1);eqCnt=eqs.length;renderEditQ()}
 
-        if (questions && questions.length > 0) {
-            for (const q of questions) {
-                editQuestionCounter++;
-                const qImages = imageMap[q.id] || [];
-                editQuestions.push({
-                    tempId: editQuestionCounter,
-                    id: q.id,
-                    correctAnswer: q.correct_answer,
-                    images: qImages.map(img => ({ id: img.id, url: img.image_url }))
-                });
-            }
-        }
+function setAnswer(tid,a){const q=eqs.find(q=>q.tid===tid);if(q)q.answer=a;renderEditQ()}
+function setExplanation(tid,txt){const q=eqs.find(q=>q.tid===tid);if(q)q.explanation=txt}
 
-        renderEditQuestions();
-        showView('viewCreateTest');
-    } catch (err) {
-        alert('Fehler beim Laden des Tests: ' + err.message);
+function triggerUpload(tid){
+    const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
+    inp.onchange=e=>handleUpload(e,tid);inp.click();
+}
+
+async function handleUpload(ev,tid){
+    const q=eqs.find(q=>q.tid===tid);if(!q)return;
+    for(const f of ev.target.files){
+        if(!f.type.startsWith('image/'))continue;
+        if(f.size>5*1024*1024){alert('Zu gross: '+f.name);continue}
+        try{
+            const blob=await compressImg(f);
+            const fn=`t_${Date.now()}_${Math.random().toString(36).substr(2,6)}.jpg`;
+            const {error}=await db.storage.from('aoi-images').upload(fn,blob,{contentType:'image/jpeg',upsert:false});
+            if(error)throw error;
+            const {data:ud}=db.storage.from('aoi-images').getPublicUrl(fn);
+            q.images.push({id:null,url:ud.publicUrl});
+        }catch(e){alert('Upload-Fehler: '+e.message)}
     }
+    renderEditQ();
 }
 
-function addQuestions() {
-    const count = parseInt(document.getElementById('addQuestionsCount').value) || 1;
-    for (let i = 0; i < count; i++) {
-        editQuestionCounter++;
-        editQuestions.push({
-            tempId: editQuestionCounter,
-            id: null,
-            correctAnswer: null,
-            images: []
-        });
-    }
-    renderEditQuestions();
-}
-
-function removeEditQuestion(tempId) {
-    editQuestions = editQuestions.filter(q => q.tempId !== tempId);
-    // Neu nummerieren
-    editQuestions.forEach((q, i) => q.tempId = i + 1);
-    editQuestionCounter = editQuestions.length;
-    renderEditQuestions();
-}
-
-function setCorrectAnswer(tempId, answer) {
-    const q = editQuestions.find(q => q.tempId === tempId);
-    if (q) q.correctAnswer = answer;
-    renderEditQuestions();
-}
-
-function triggerImageUpload(tempId) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.multiple = true;
-    input.onchange = (e) => handleImageUpload(e, tempId);
-    input.click();
-}
-
-async function handleImageUpload(event, tempId) {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    const q = editQuestions.find(q => q.tempId === tempId);
-    if (!q) return;
-
-    for (const file of files) {
-        if (!file.type.startsWith('image/')) continue;
-        if (file.size > 5 * 1024 * 1024) { alert('Bild zu gross (max 5MB): ' + file.name); continue; }
-
-        try {
-            // Bild komprimieren
-            const compressed = await compressImage(file);
-            // In Supabase Storage hochladen
-            const fileName = `test_${Date.now()}_${Math.random().toString(36).substr(2,6)}.jpg`;
-            const { data, error } = await db.storage
-                .from('aoi-images')
-                .upload(fileName, compressed, { contentType: 'image/jpeg', upsert: false });
-
-            if (error) throw error;
-
-            // Oeffentliche URL holen
-            const { data: urlData } = db.storage.from('aoi-images').getPublicUrl(fileName);
-            q.images.push({ id: null, url: urlData.publicUrl });
-        } catch (err) {
-            alert('Fehler beim Hochladen: ' + err.message);
-        }
-    }
-    renderEditQuestions();
-}
-
-function compressImage(file, maxSizeMB = 1) {
-    return new Promise((resolve, reject) => {
-        if (file.size <= maxSizeMB * 1024 * 1024) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                // Auch kleine Bilder in Canvas laden fuer konsistentes Format
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let w = img.width, h = img.height;
-                    const maxDim = 1200;
-                    if (w > maxDim) { h = (h * maxDim) / w; w = maxDim; }
-                    if (h > maxDim) { w = (w * maxDim) / h; h = maxDim; }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    canvas.toBlob(blob => resolve(blob || new Blob()), 'image/jpeg', 0.8);
-                };
-                img.src = e.target.result;
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let w = img.width, h = img.height;
-                const maxDim = 1200;
-                if (w > maxDim) { h = (h * maxDim) / w; w = maxDim; }
-                if (h > maxDim) { w = (w * maxDim) / h; h = maxDim; }
-                canvas.width = w; canvas.height = h;
-                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                canvas.toBlob(blob => resolve(blob || new Blob()), 'image/jpeg', 0.8);
-            };
-            img.onerror = reject;
-            img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+function compressImg(file){
+    return new Promise((res,rej)=>{
+        const r=new FileReader();r.onload=e=>{
+            const img=new Image();img.onload=()=>{
+                const c=document.createElement('canvas');let w=img.width,h=img.height;const m=1200;
+                if(w>m){h=h*m/w;w=m}if(h>m){w=w*m/h;h=m}
+                c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+                c.toBlob(b=>res(b||new Blob()),'image/jpeg',.8);
+            };img.onerror=rej;img.src=e.target.result;
+        };r.onerror=rej;r.readAsDataURL(file);
     });
 }
 
-async function removeEditImage(tempId, imageIndex) {
-    const q = editQuestions.find(q => q.tempId === tempId);
-    if (!q) return;
-    const img = q.images[imageIndex];
-    // Aus Storage loeschen (wenn hochgeladen)
-    if (img.url && img.url.includes('aoi-images')) {
-        try {
-            const parts = img.url.split('/aoi-images/');
-            if (parts[1]) await db.storage.from('aoi-images').remove([parts[1]]);
-        } catch (e) { console.warn('Storage-Loeschfehler:', e); }
-    }
-    q.images.splice(imageIndex, 1);
-    renderEditQuestions();
+async function rmImg(tid,idx){
+    const q=eqs.find(q=>q.tid===tid);if(!q)return;
+    const img=q.images[idx];
+    try{const p=img.url.split('/aoi-images/');if(p[1])await db.storage.from('aoi-images').remove([p[1]])}catch(e){}
+    q.images.splice(idx,1);renderEditQ();
 }
 
-function renderEditQuestions() {
-    const container = document.getElementById('questionsContainer');
-    if (editQuestions.length === 0) {
-        container.innerHTML = '<div class="text-center text-muted mt-3">Keine Fragen. Klicken Sie auf "Fragen hinzufuegen".</div>';
-        return;
-    }
-
-    container.innerHTML = editQuestions.map((q, idx) => `
+function renderEditQ(){
+    const c=$('editQContainer');
+    if(!eqs.length){c.innerHTML='<div class="text-center text-muted mt-3">Keine Fragen.</div>';return}
+    c.innerHTML=eqs.map((q,i)=>`
         <div class="question-card">
             <div class="flex justify-between items-center mb-1">
-                <span class="question-number">Frage ${idx + 1}</span>
-                <button class="btn btn-danger btn-sm" onclick="removeEditQuestion(${q.tempId})">Entfernen</button>
+                <span class="question-number">Frage ${i+1}</span>
+                <button class="btn btn-danger btn-sm" onclick="rmQ(${q.tid})">Entfernen</button>
             </div>
-
             <div class="images-grid">
-                ${q.images.map((img, i) => `
-                    <div class="image-upload-box" onclick="openImageModal('${img.url}')">
-                        <img src="${img.url}" alt="Bild ${i+1}">
-                        <button class="image-remove" onclick="event.stopPropagation(); removeEditImage(${q.tempId}, ${i})">x</button>
-                    </div>
-                `).join('')}
-                ${q.images.length < 10 ? `
-                    <div class="image-upload-box" onclick="triggerImageUpload(${q.tempId})">
-                        <div class="placeholder-text">+ Bild<br>hinzufuegen</div>
-                    </div>
-                ` : ''}
+                ${q.images.map((img,j)=>`<div class="image-box" onclick="openModal('${img.url}')"><img src="${img.url}" alt="Bild"><button class="img-rm" onclick="event.stopPropagation();rmImg(${q.tid},${j})">x</button></div>`).join('')}
+                ${q.images.length<10?`<div class="image-box" onclick="triggerUpload(${q.tid})"><div class="ph">+ Bild</div></div>`:''}
             </div>
-
             <div class="answer-options">
-                <div class="answer-option ${q.correctAnswer === 'gut' ? 'selected-gut' : ''}"
-                     onclick="setCorrectAnswer(${q.tempId}, 'gut')">
-                    Gut (IO)
-                </div>
-                <div class="answer-option ${q.correctAnswer === 'nicht_gut' ? 'selected-nicht-gut' : ''}"
-                     onclick="setCorrectAnswer(${q.tempId}, 'nicht_gut')">
-                    Nicht gut (NIO)
-                </div>
+                <div class="answer-option ${q.answer==='gut'?'sel-gut':''}" onclick="setAnswer(${q.tid},'gut')">Gut (IO)</div>
+                <div class="answer-option ${q.answer==='nicht_gut'?'sel-nio':''}" onclick="setAnswer(${q.tid},'nicht_gut')">Nicht gut (NIO)</div>
             </div>
-            ${q.correctAnswer ? '<div style="font-size:12px;color:#28a745;font-weight:600;">Musterloesung festgelegt</div>' : '<div style="font-size:12px;color:#dc3545;">Bitte Musterloesung waehlen</div>'}
-        </div>
-    `).join('');
+            ${q.answer?'':'<div style="font-size:12px;color:#dc3545">Bitte Musterloesung waehlen</div>'}
+            <div class="form-group mt-1">
+                <label class="form-label" style="font-size:12px">Erklaerung (wird dem Operator nach dem Test angezeigt)</label>
+                <input type="text" class="form-input" style="font-size:13px;padding:8px 12px" value="${q.explanation||''}" oninput="setExplanation(${q.tid},this.value)" placeholder="z.B. Lotbruecke erkennbar bei Pin 3-4">
+            </div>
+        </div>`).join('');
 }
 
-async function saveTest() {
-    const title = document.getElementById('testTitleInput').value.trim();
-    const desc = document.getElementById('testDescInput').value.trim();
-    const passScore = parseInt(document.getElementById('testPassScore').value) || 0;
-
-    if (!title) { alert('Bitte einen Titel eingeben.'); return; }
-    if (editQuestions.length === 0) { alert('Bitte mindestens eine Frage hinzufuegen.'); return; }
-
-    const missingAnswers = editQuestions.filter(q => !q.correctAnswer);
-    if (missingAnswers.length > 0) {
-        alert(`Bitte fuer alle Fragen eine Musterloesung waehlen. Fehlend: ${missingAnswers.length} Fragen.`);
-        return;
-    }
-
-    try {
-        let testId = editTestId;
-
-        if (testId) {
-            // Bestehenden Test aktualisieren
-            await db.from('tests').update({
-                title: title,
-                description: desc,
-                passing_score: passScore,
-                updated_at: new Date().toISOString()
-            }).eq('id', testId);
-
-            // Alte Fragen und Bilder loeschen
-            const { data: oldQuestions } = await db.from('questions').select('id').eq('test_id', testId);
-            if (oldQuestions) {
-                for (const oq of oldQuestions) {
-                    await db.from('question_images').delete().eq('question_id', oq.id);
-                }
-                await db.from('questions').delete().eq('test_id', testId);
-            }
-        } else {
-            // Neuen Test erstellen
-            const { data, error } = await db.from('tests').insert({
-                title: title,
-                description: desc,
-                passing_score: passScore,
-                created_by: currentUser.id
-            }).select().single();
-            if (error) throw error;
-            testId = data.id;
+async function saveTest(){
+    const title=$('testTitleIn').value.trim(),desc=$('testDescIn').value.trim(),ps=parseInt($('testPassIn').value)||0;
+    if(!title){alert('Titel fehlt.');return}
+    if(!eqs.length){alert('Mindestens 1 Frage.');return}
+    if(eqs.some(q=>!q.answer)){alert('Bitte fuer alle Fragen eine Musterloesung waehlen.');return}
+    try{
+        let tid=editId;
+        if(tid){
+            await db.from('tests').update({title,description:desc,passing_score:ps,updated_at:new Date().toISOString()}).eq('id',tid);
+            const {data:oq}=await db.from('questions').select('id').eq('test_id',tid);
+            if(oq)for(const q of oq){await db.from('question_images').delete().eq('question_id',q.id)}
+            await db.from('questions').delete().eq('test_id',tid);
+        }else{
+            const {data,error}=await db.from('tests').insert({title,description:desc,passing_score:ps,created_by:me.id}).select().single();
+            if(error)throw error;tid=data.id;
         }
-
-        // Fragen und Bilder speichern
-        for (let i = 0; i < editQuestions.length; i++) {
-            const eq = editQuestions[i];
-            const { data: questionData, error: qErr } = await db.from('questions').insert({
-                test_id: testId,
-                question_number: i + 1,
-                correct_answer: eq.correctAnswer,
-                sort_order: i
-            }).select().single();
-            if (qErr) throw qErr;
-
-            // Bilder-Verweise speichern
-            for (const img of eq.images) {
-                await db.from('question_images').insert({
-                    question_id: questionData.id,
-                    image_url: img.url,
-                    image_order: eq.images.indexOf(img)
-                });
-            }
+        for(let i=0;i<eqs.length;i++){
+            const eq=eqs[i];
+            const {data:qd,error:qe}=await db.from('questions').insert({test_id:tid,question_number:i+1,correct_answer:eq.answer,sort_order:i,explanation:eq.explanation||''}).select().single();
+            if(qe)throw qe;
+            for(const img of eq.images){await db.from('question_images').insert({question_id:qd.id,image_url:img.url,image_order:eq.images.indexOf(img)})}
         }
-
-        alert('Test erfolgreich gespeichert!');
-        editTestId = null;
-        showPrueferDashboard();
-    } catch (err) {
-        alert('Fehler beim Speichern: ' + err.message);
-    }
+        alert('Test gespeichert!');editId=null;showPrueferDashboard();
+    }catch(e){alert('Fehler: '+e.message)}
 }
 
 // ============================================================
-// PRUEFER: ERGEBNISSE
+// PRUEFER ERGEBNISSE
 // ============================================================
-async function showPrueferResults() {
-    showView('viewPrueferResults');
-    const container = document.getElementById('prueferResultsList');
-    container.innerHTML = '<div class="loading"><div class="spinner"></div>Laden...</div>';
-
-    try {
-        const { data: results, error } = await db
-            .from('test_results')
-            .select('*, tests(title)')
-            .order('completed_at', { ascending: false })
-            .limit(100);
-
-        if (error) throw error;
-
-        if (!results || results.length === 0) {
-            container.innerHTML = '<div class="text-center text-muted">Noch keine Ergebnisse vorhanden.</div>';
-            return;
-        }
-
-        container.innerHTML = results.map(r => `
-            <div class="result-card ${r.passed ? 'passed' : 'failed'}">
+async function showPrueferResults(){
+    showView('viewPrueferResults');const c=$('prueferResultsList');
+    c.innerHTML='<div class="loading"><div class="spinner"></div>Laden...</div>';
+    try{
+        const {data:results}=await db.from('test_results').select('*,tests(title)').order('completed_at',{ascending:false}).limit(100);
+        if(!results||!results.length){c.innerHTML='<div class="text-center text-muted">Keine Ergebnisse.</div>';return}
+        c.innerHTML=results.map(r=>`
+            <div class="result-card ${r.passed?'passed':'failed'}">
                 <div class="flex justify-between items-center">
-                    <div>
-                        <div style="font-weight:700;font-size:15px;">${r.tests ? r.tests.title : 'Test'}</div>
-                        <div class="text-muted" style="font-size:12px;">
-                            ${r.operator_name || '-'} (${r.operator_number || '-'}) | ${formatDate(r.completed_at)}
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <div class="result-score ${r.passed ? 'score-pass' : 'score-fail'}">
-                            ${r.score}/${r.max_score}
-                        </div>
-                        <div style="font-size:12px;font-weight:600;color:${r.passed ? '#28a745' : '#dc3545'}">
-                            ${r.passed ? 'BESTANDEN' : 'NICHT BESTANDEN'}
-                        </div>
-                    </div>
+                    <div><div style="font-weight:700;font-size:15px">${r.tests?r.tests.title:'Test'}</div><div class="text-muted" style="font-size:12px">${r.operator_name||'-'} (${r.operator_number||'-'}) | ${fmtDate(r.completed_at)} | Zeit: ${fmtTime(r.time_seconds)}</div></div>
+                    <div class="text-center"><div class="result-score ${r.passed?'score-pass':'score-fail'}">${r.score}/${r.max_score}</div><div style="font-size:12px;font-weight:600;color:${r.passed?'#28a745':'#dc3545'}">${r.passed?'BESTANDEN':'NICHT BESTANDEN'}</div></div>
                     <button class="btn btn-primary btn-sm" onclick="viewResult('${r.id}')">Details</button>
                 </div>
-            </div>
-        `).join('');
-    } catch (err) {
-        container.innerHTML = '<div style="color:#dc3545;">Fehler: ' + err.message + '</div>';
-    }
+            </div>`).join('');
+    }catch(e){c.innerHTML='<div style="color:#dc3545">'+e.message+'</div>'}
 }
 
 // ============================================================
-// OPERATOR: TEST-LISTE
+// OPERATOR TESTS
 // ============================================================
-async function showOperatorTests() {
-    showView('viewOperatorTests');
-    await loadOperatorTests();
-    await loadOperatorHistory();
-}
+async function showOpTests(){showView('viewOpTests');await loadOpTests();await loadOpHistory()}
 
-async function loadOperatorTests() {
-    const container = document.getElementById('operatorTestList');
-    container.innerHTML = '<div class="loading"><div class="spinner"></div>Laden...</div>';
-
-    try {
-        const { data: tests, error } = await db
-            .from('tests')
-            .select('*')
-            .eq('is_active', true)
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        if (!tests || tests.length === 0) {
-            container.innerHTML = '<div class="card text-center text-muted">Aktuell keine Tests verfuegbar.</div>';
-            return;
-        }
-
-        // Frageanzahl laden
-        const { data: qCounts } = await db.from('questions').select('test_id');
-        const countMap = {};
-        if (qCounts) qCounts.forEach(q => { countMap[q.test_id] = (countMap[q.test_id] || 0) + 1; });
-
-        container.innerHTML = tests.map(t => `
+async function loadOpTests(){
+    const c=$('opTestList');c.innerHTML='<div class="loading"><div class="spinner"></div>Laden...</div>';
+    try{
+        const {data:tests}=await db.from('tests').select('*').eq('is_active',true).order('created_at',{ascending:false});
+        if(!tests||!tests.length){c.innerHTML='<div class="card text-center text-muted">Keine Tests verfuegbar.</div>';return}
+        const {data:qc}=await db.from('questions').select('test_id');const cm={};if(qc)qc.forEach(q=>cm[q.test_id]=(cm[q.test_id]||0)+1);
+        c.innerHTML=tests.map(t=>`
             <div class="test-card" onclick="startTest('${t.id}')">
                 <div class="test-title">${t.title}</div>
-                <div class="test-meta">
-                    <span>${countMap[t.id] || 0} Fragen</span>
-                    <span>Mindest: ${t.passing_score} Punkte</span>
-                </div>
-                <div class="text-muted mt-1" style="font-size:11px;">${t.description || ''}</div>
+                <div class="test-meta"><span>${cm[t.id]||0} Fragen</span><span>Mindest: ${t.passing_score}</span></div>
+                <div class="text-muted mt-1" style="font-size:11px">${t.description||''}</div>
                 <button class="btn btn-success btn-sm mt-1">Test starten</button>
-            </div>
-        `).join('');
-    } catch (err) {
-        container.innerHTML = '<div class="card" style="color:#dc3545;">Fehler: ' + err.message + '</div>';
-    }
+            </div>`).join('');
+    }catch(e){c.innerHTML='<div style="color:#dc3545">'+e.message+'</div>'}
 }
 
-async function loadOperatorHistory() {
-    if (!currentUser) return;
-    try {
-        const { data: results } = await db
-            .from('test_results')
-            .select('*, tests(title)')
-            .eq('operator_id', currentUser.id)
-            .order('completed_at', { ascending: false })
-            .limit(10);
-
-        if (results && results.length > 0) {
-            document.getElementById('operatorHistoryCard').style.display = 'block';
-            document.getElementById('operatorHistory').innerHTML = results.map(r => `
-                <div class="result-card ${r.passed ? 'passed' : 'failed'}" style="padding:10px;">
+async function loadOpHistory(){
+    if(!me)return;
+    try{
+        const {data:results}=await db.from('test_results').select('*,tests(title)').eq('operator_id',me.id).order('completed_at',{ascending:false}).limit(10);
+        if(results&&results.length){
+            $('opHistoryCard').style.display='block';
+            $('opHistory').innerHTML=results.map(r=>`
+                <div class="result-card ${r.passed?'passed':'failed'}" style="padding:10px">
                     <div class="flex justify-between items-center">
-                        <div>
-                            <span style="font-weight:600;">${r.tests ? r.tests.title : 'Test'}</span>
-                            <span class="text-muted" style="font-size:11px;margin-left:12px;">${formatDate(r.completed_at)}</span>
-                        </div>
-                        <div>
-                            <span class="result-score ${r.passed ? 'score-pass' : 'score-fail'}" style="font-size:16px;">${r.score}/${r.max_score}</span>
-                            <button class="btn btn-sm btn-primary" style="margin-left:8px;" onclick="viewResult('${r.id}')">Details</button>
-                        </div>
+                        <div><span style="font-weight:600">${r.tests?r.tests.title:'Test'}</span><span class="text-muted" style="font-size:11px;margin-left:12px">${fmtDate(r.completed_at)}</span></div>
+                        <div class="flex items-center gap-1"><span class="result-score ${r.passed?'score-pass':'score-fail'}" style="font-size:16px">${r.score}/${r.max_score}</span><button class="btn btn-sm btn-primary" onclick="viewResult('${r.id}')">Details</button></div>
                     </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
-    } catch (err) { console.warn('History-Fehler:', err); }
+    }catch(e){}
 }
 
 // ============================================================
-// OPERATOR: TEST DURCHFUEHREN
+// TEST DURCHFUEHREN
 // ============================================================
-async function startTest(testId) {
-    if (!confirm('Moechten Sie den Test starten? Der Timer beginnt automatisch.')) return;
+async function startTest(tid){
+    if(!confirm('Test starten? Der Timer beginnt automatisch.'))return;
+    try{
+        const {data:test}=await db.from('tests').select('*').eq('id',tid).single();
+        if(!test){alert('Test nicht gefunden.');return}
+        const {data:qs}=await db.from('questions').select('*').eq('test_id',tid).order('question_number');
+        if(!qs||!qs.length){alert('Keine Fragen.');return}
+        const {data:imgs}=await db.from('question_images').select('*').in('question_id',qs.map(q=>q.id));
 
-    try {
-        // Test laden
-        const { data: test } = await db.from('tests').select('*').eq('id', testId).single();
-        if (!test) { alert('Test nicht gefunden.'); return; }
+        aTest=test;aQuestions=qs;aAnswers={};aImages={};aResultId=null;tSeconds=0;
+        if(imgs)imgs.forEach(i=>{if(!aImages[i.question_id])aImages[i.question_id]=[];aImages[i.question_id].push(i)});
 
-        // Fragen laden
-        const { data: questions } = await db.from('questions').select('*').eq('test_id', testId).order('question_number');
-        if (!questions || questions.length === 0) { alert('Dieser Test hat keine Fragen.'); return; }
+        if(tInterval)clearInterval(tInterval);
+        tInterval=setInterval(()=>{tSeconds++;$('testTimer').textContent='Benoetigte Zeit: '+fmtTime(tSeconds)},1000);
 
-        // Bilder laden
-        const questionIds = questions.map(q => q.id);
-        const { data: allImages } = await db.from('question_images').select('*').in('question_id', questionIds);
-
-        activeTest = test;
-        activeTestQuestions = questions;
-        activeTestAnswers = {};
-        activeTestImages = {};
-        activeResultId = null;
-        timerSeconds = 0;
-
-        if (allImages) {
-            allImages.forEach(img => {
-                if (!activeTestImages[img.question_id]) activeTestImages[img.question_id] = [];
-                activeTestImages[img.question_id].push(img);
-            });
-        }
-
-        // Timer starten
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            timerSeconds++;
-            document.getElementById('testTimer').textContent = 'Benoetigte Zeit: ' + formatTime(timerSeconds);
-        }, 1000);
-
-        document.getElementById('takeTestTitle').textContent = test.title;
-        document.getElementById('signatureSection').style.display = 'none';
-        document.getElementById('finalizeBtn').disabled = true;
-
-        renderTestQuestions();
+        $('takeTitle').textContent=test.title;
+        $('sigSection').style.display='none';
+        $('finalizeBtn').disabled=true;
+        $('warningBox').style.display='none';
+        renderTakeQ();
         showView('viewTakeTest');
-    } catch (err) {
-        alert('Fehler beim Laden des Tests: ' + err.message);
-    }
+    }catch(e){alert(e.message)}
 }
 
-function renderTestQuestions() {
-    const container = document.getElementById('testQuestionsContainer');
-    const total = activeTestQuestions.length;
-
-    container.innerHTML = activeTestQuestions.map((q, idx) => {
-        const images = activeTestImages[q.id] || [];
+function renderTakeQ(){
+    const c=$('takeQContainer'),total=aQuestions.length;
+    c.innerHTML=aQuestions.map((q,i)=>{
+        const imgs=aImages[q.id]||[];
         return `
-        <div class="question-card mb-2" id="tq-${q.id}">
-            <div class="question-number">Frage ${idx + 1} von ${total}</div>
-
-            ${images.length > 0 ? `
-            <div class="operator-images">
-                ${images.map(img => `
-                    <div class="operator-image-box" onclick="openImageModal('${img.image_url}')">
-                        <img src="${img.image_url}" alt="Pruefbild" loading="lazy">
-                    </div>
-                `).join('')}
-            </div>
-            ` : '<div class="text-muted mb-1" style="font-size:13px;">Keine Bilder vorhanden.</div>'}
-
+        <div class="question-card" id="tq-${q.id}">
+            <div class="question-number">Frage ${i+1} von ${total}</div>
+            ${imgs.length?`<div class="op-images">${imgs.map(img=>`<div class="op-img" onclick="openModal('${img.image_url}')"><img src="${img.image_url}" alt="Pruefbild" loading="lazy"></div>`).join('')}</div>`:'<div class="text-muted mb-1" style="font-size:13px">Keine Bilder.</div>'}
             <div class="answer-options">
-                <div class="answer-option" id="ans-${q.id}-gut" onclick="selectTestAnswer('${q.id}', 'gut')">
-                    Gut (IO)
-                </div>
-                <div class="answer-option" id="ans-${q.id}-nicht_gut" onclick="selectTestAnswer('${q.id}', 'nicht_gut')">
-                    Nicht gut (NIO)
-                </div>
+                <div class="answer-option" id="ans-${q.id}-gut" onclick="pickAnswer('${q.id}','gut')">Gut (IO)</div>
+                <div class="answer-option" id="ans-${q.id}-nicht_gut" onclick="pickAnswer('${q.id}','nicht_gut')">Nicht gut (NIO)</div>
             </div>
-
-            <textarea class="comment-field" id="comment-${q.id}"
-                placeholder="Begruendung eingeben (Pflicht bei 'Nicht gut')..."
-                oninput="checkTestComplete()"></textarea>
-        </div>
-        `;
+            <div class="defect-section" id="defects-${q.id}">
+                <div class="defect-section-title">Warum "Nicht gut"? Bitte waehlen Sie mindestens einen Grund:</div>
+                ${Object.entries(DEFECTS).map(([cat,items])=>`
+                    <div class="defect-category-label">${cat}</div>
+                    <div class="defect-grid">${items.map(item=>`<div class="defect-chip" data-qid="${q.id}" data-defect="${item}" onclick="toggleDefect(this)">${item}</div>`).join('')}</div>
+                `).join('')}
+                <div class="defect-category-label mt-1">Zusaetzlicher Kommentar (optional)</div>
+                <textarea class="comment-field" id="cmt-${q.id}" placeholder="Optional: weitere Details..." oninput="checkComplete()"></textarea>
+            </div>
+        </div>`;
     }).join('');
-
-    updateTestProgress();
+    updateProgress();
 }
 
-function selectTestAnswer(questionId, answer) {
-    activeTestAnswers[questionId] = answer;
+// Antwort waehlen
+function pickAnswer(qid,ans){
+    aAnswers[qid]=aAnswers[qid]||{answer:null,defects:[]};
+    aAnswers[qid].answer=ans;
 
-    // UI aktualisieren
-    const gutEl = document.getElementById('ans-' + questionId + '-gut');
-    const nioEl = document.getElementById('ans-' + questionId + '-nicht_gut');
-    gutEl.className = 'answer-option' + (answer === 'gut' ? ' selected-gut' : '');
-    nioEl.className = 'answer-option' + (answer === 'nicht_gut' ? ' selected-nicht-gut' : '');
+    $('ans-'+qid+'-gut').className='answer-option'+(ans==='gut'?' sel-gut':'');
+    $('ans-'+qid+'-nicht_gut').className='answer-option'+(ans==='nicht_gut'?' sel-nio':'');
 
-    checkTestComplete();
-    updateTestProgress();
+    // Defect-Section anzeigen/verstecken
+    const ds=$('defects-'+qid);
+    if(ans==='nicht_gut'){ds.classList.add('visible')}else{ds.classList.remove('visible');aAnswers[qid].defects=[];document.querySelectorAll(`[data-qid="${qid}"]`).forEach(c=>c.classList.remove('selected'))}
+
+    checkComplete();updateProgress();
 }
 
-function updateTestProgress() {
-    const total = activeTestQuestions.length;
-    const answered = Object.keys(activeTestAnswers).length;
-    const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
-    const bar = document.getElementById('testProgress');
-    bar.style.width = pct + '%';
-    bar.textContent = answered + ' / ' + total + ' (' + pct + '%)';
+// Defekt-Chip umschalten
+function toggleDefect(el){
+    const qid=el.dataset.qid,def=el.dataset.defect;
+    if(!aAnswers[qid])aAnswers[qid]={answer:null,defects:[]};
+    const idx=aAnswers[qid].defects.indexOf(def);
+    if(idx>=0){aAnswers[qid].defects.splice(idx,1);el.classList.remove('selected')}
+    else{aAnswers[qid].defects.push(def);el.classList.add('selected')}
+    checkComplete();
 }
 
-function checkTestComplete() {
-    const total = activeTestQuestions.length;
-    const answered = Object.keys(activeTestAnswers).length;
-    let allCommentsValid = true;
+function updateProgress(){
+    const total=aQuestions.length,answered=Object.keys(aAnswers).filter(id=>aAnswers[id].answer).length;
+    const pct=total?Math.round((answered/total)*100):0;
+    $('testProgress').style.width=pct+'%';$('testProgress').textContent=answered+' / '+total+' ('+pct+'%)';
+}
 
-    for (const q of activeTestQuestions) {
-        const ans = activeTestAnswers[q.id];
-        if (ans === 'nicht_gut') {
-            const comment = document.getElementById('comment-' + q.id);
-            if (comment && !comment.value.trim()) allCommentsValid = false;
+function checkComplete(){
+    const total=aQuestions.length;
+    let answered=0, allValid=true, missing=[];
+
+    for(const q of aQuestions){
+        const a=aAnswers[q.id];
+        if(!a||!a.answer){allValid=false;missing.push('Frage '+(aQuestions.indexOf(q)+1)+': nicht beantwortet');continue}
+        answered++;
+        if(a.answer==='nicht_gut'){
+            if(!a.defects||!a.defects.length){allValid=false;missing.push('Frage '+(aQuestions.indexOf(q)+1)+': Grund waehlen')}
         }
     }
 
-    const complete = answered === total && allCommentsValid;
-    document.getElementById('finalizeBtn').disabled = !complete;
+    // Unterschrift pruefen
+    const hasOpSig=sigPads.sigOp&&!sigPads.sigOp.isEmpty();
+    if(!hasOpSig&&answered===total&&allValid){missing.push('Unterschrift fehlt')}
 
-    if (complete) {
-        document.getElementById('signatureSection').style.display = 'block';
+    const complete=answered===total&&allValid&&hasOpSig;
+    $('finalizeBtn').disabled=!complete;
+
+    // Warning
+    const wb=$('warningBox');
+    if(!complete&&answered>0){
+        wb.style.display='block';
+        wb.textContent='Fehlt noch: '+missing.join(', ');
+    }else{
+        wb.style.display='none';
     }
+
+    if(answered===total&&allValid){$('sigSection').style.display='block'}
 }
 
-function cancelTest() {
-    if (confirm('Moechten Sie den Test wirklich abbrechen? Alle Antworten gehen verloren.')) {
-        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-        activeTest = null;
-        showOperatorTests();
-    }
+function cancelTest(){
+    if(!confirm('Test abbrechen? Antworten gehen verloren.'))return;
+    if(tInterval){clearInterval(tInterval);tInterval=null}
+    aTest=null;showOpTests();
 }
 
 // ============================================================
-// UNTERSCHRIFT
+// SIGNATURE
 // ============================================================
-const sigPads = {};
+const sigPads={};
 
-function initSigPad(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let drawing = false;
-    let empty = true;
-
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    function getPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - rect.left;
-        const y = (e.clientY || e.touches[0].clientY) - rect.top;
-        return { x: x * (canvas.width / rect.width), y: y * (canvas.height / rect.height) };
-    }
-
-    canvas.addEventListener('mousedown', e => { drawing = true; empty = false; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
-    canvas.addEventListener('mousemove', e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
-    canvas.addEventListener('mouseup', () => drawing = false);
-    canvas.addEventListener('mouseout', () => drawing = false);
-
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; empty = false; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
-    canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
-    canvas.addEventListener('touchend', () => drawing = false);
-
-    sigPads[canvasId] = { canvas, ctx, isEmpty: () => empty, clear: () => { ctx.clearRect(0, 0, canvas.width, canvas.height); empty = true; }, toDataURL: () => canvas.toDataURL() };
+function initSig(id){
+    const cv=$(id);if(!cv)return;
+    const ctx=cv.getContext('2d');let drawing=false,empty=true;
+    ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';
+    function pos(e){const r=cv.getBoundingClientRect();const x=(e.clientX||e.touches[0].clientX)-r.left;const y=(e.clientY||e.touches[0].clientY)-r.top;return{x:x*(cv.width/r.width),y:y*(cv.height/r.height)}}
+    cv.addEventListener('mousedown',e=>{drawing=true;empty=false;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)});
+    cv.addEventListener('mousemove',e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke()});
+    cv.addEventListener('mouseup',()=>drawing=false);cv.addEventListener('mouseout',()=>drawing=false);
+    cv.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;empty=false;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)});
+    cv.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke()});
+    cv.addEventListener('touchend',()=>drawing=false);
+    sigPads[id]={canvas:cv,ctx,isEmpty:()=>empty,clear:()=>{ctx.clearRect(0,0,cv.width,cv.height);empty=true},toDataURL:()=>cv.toDataURL()};
 }
 
-function clearSig(canvasId) {
-    if (sigPads[canvasId]) sigPads[canvasId].clear();
-}
+function clearSig(id){if(sigPads[id])sigPads[id].clear();checkComplete()}
 
 // ============================================================
 // TEST ABSCHLIESSEN
 // ============================================================
-async function finalizeTest() {
-    if (!confirm('Test abschliessen? Nach dem Abschliessen koennen Sie die Antworten nicht mehr aendern.')) return;
+async function finalizeTest(){
+    // Nochmal alles pruefen
+    const total=aQuestions.length;
+    let score=0;const answersData=[];
 
-    // Timer stoppen
-    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    for(const q of aQuestions){
+        const a=aAnswers[q.id];
+        const given=a?a.answer:null;
+        const correct=q.correct_answer;
+        const isCorrect=given===correct;
+        if(isCorrect)score++;
 
-    // Antworten auswerten
-    let score = 0;
-    const answersData = [];
+        const defects=(a&&a.defects)?a.defects.join(', '):'';
+        const cmtEl=$('cmt-'+q.id);
+        const cmt=cmtEl?cmtEl.value.trim():'';
 
-    for (const q of activeTestQuestions) {
-        const given = activeTestAnswers[q.id] || null;
-        const correct = q.correct_answer;
-        const isCorrect = given === correct;
-        if (isCorrect) score++;
-
-        const commentEl = document.getElementById('comment-' + q.id);
-        const comment = commentEl ? commentEl.value.trim() : '';
-
-        answersData.push({
-            question_id: q.id,
-            answer: given,
-            is_correct: isCorrect,
-            comment: comment
-        });
+        answersData.push({question_id:q.id,answer:given,is_correct:isCorrect,selected_defects:defects,comment:cmt});
     }
 
-    const maxScore = activeTestQuestions.length;
-    const passed = score >= activeTest.passing_score;
+    const maxScore=total,passed=score>=aTest.passing_score;
+    const opSig=sigPads.sigOp&&!sigPads.sigOp.isEmpty()?sigPads.sigOp.toDataURL():null;
+    const exSig=sigPads.sigEx&&!sigPads.sigEx.isEmpty()?sigPads.sigEx.toDataURL():null;
 
-    // Unterschriften
-    const opSig = sigPads['sigOperator'] && !sigPads['sigOperator'].isEmpty() ? sigPads['sigOperator'].toDataURL() : null;
-    const exSig = sigPads['sigExaminer'] && !sigPads['sigExaminer'].isEmpty() ? sigPads['sigExaminer'].toDataURL() : null;
+    if(tInterval){clearInterval(tInterval);tInterval=null}
 
-    try {
-        // Ergebnis speichern
-        const { data: resultData, error } = await db.from('test_results').insert({
-            test_id: activeTest.id,
-            operator_id: currentUser.id,
-            operator_name: currentUser.name,
-            operator_number: currentUser.employee_number,
-            score: score,
-            max_score: maxScore,
-            passed: passed,
-            time_seconds: timerSeconds,
-            operator_signature: opSig,
-            examiner_signature: exSig,
-            finalized: true,
-            completed_at: new Date().toISOString()
+    if(!confirm(`Test abschliessen?\n\nPunkte: ${score}/${maxScore}\n${passed?'BESTANDEN':'NICHT BESTANDEN'}\nZeit: ${fmtTime(tSeconds)}\n\nUnterschriften werden gespeichert.`))return;
+
+    try{
+        const {data:rd,error}=await db.from('test_results').insert({
+            test_id:aTest.id,operator_id:me.id,operator_name:me.name,operator_number:me.employee_number,
+            score,max_score:total,passed,time_seconds:tSeconds,
+            operator_signature:opSig,examiner_signature:exSig,finalized:true,
+            completed_at:new Date().toISOString()
         }).select().single();
+        if(error)throw error;
 
-        if (error) throw error;
-
-        // Einzelne Antworten speichern
-        for (const a of answersData) {
-            await db.from('answers').insert({
-                result_id: resultData.id,
-                question_id: a.question_id,
-                answer: a.answer,
-                is_correct: a.is_correct,
-                comment: a.comment
-            });
+        for(const a of answersData){
+            await db.from('answers').insert({result_id:rd.id,question_id:a.question_id,answer:a.answer,is_correct:a.is_correct,selected_defects:a.selected_defects,comment:a.comment});
         }
 
-        activeResultId = resultData.id;
-        viewResult(resultData.id);
-    } catch (err) {
-        alert('Fehler beim Speichern des Ergebnisses: ' + err.message);
-    }
+        aResultId=rd.id;
+        viewResult(rd.id);
+    }catch(e){alert('Fehler: '+e.message)}
 }
 
 // ============================================================
-// ERGEBNIS-ANZEIGE
+// ERGEBNIS ANZEIGE
 // ============================================================
-async function viewResult(resultId) {
-    try {
-        const { data: result, error } = await db
-            .from('test_results')
-            .select('*')
-            .eq('id', resultId)
-            .single();
-        if (error) throw error;
+async function viewResult(rid){
+    try{
+        const {data:r}=await db.from('test_results').select('*').eq('id',rid).single();
+        const {data:ans}=await db.from('answers').select('*').eq('result_id',rid);
+        const {data:test}=await db.from('tests').select('*').eq('id',r.test_id).single();
+        const {data:qs}=await db.from('questions').select('*').eq('test_id',r.test_id).order('question_number');
+        const qm={};if(qs)qs.forEach(q=>qm[q.id]=q);
 
-        const { data: answers } = await db.from('answers').select('*').eq('result_id', resultId);
-        const { data: test } = await db.from('tests').select('*').eq('id', result.test_id).single();
+        const qIds=(qs||[]).map(q=>q.id);
+        const {data:allImgs}=await db.from('question_images').select('*').in('question_id',qIds);
+        const im={};if(allImgs)allImgs.forEach(i=>{if(!im[i.question_id])im[i.question_id]=[];im[i.question_id].push(i)});
 
-        const { data: questions } = await db.from('questions').select('*').eq('test_id', result.test_id).order('question_number');
-        const qMap = {};
-        if (questions) questions.forEach(q => qMap[q.id] = q);
-
-        // Bilder laden
-        let imgHTML = '';
-        if (questions) {
-            const qIds = questions.map(q => q.id);
-            const { data: imgs } = await db.from('question_images').select('*').in('question_id', qIds);
-            const imgMap = {};
-            if (imgs) imgs.forEach(i => { if (!imgMap[i.question_id]) imgMap[i.question_id] = []; imgMap[i.question_id].push(i); });
-
-            if (answers && answers.length > 0) {
-                imgHTML = answers.map((a, idx) => {
-                    const q = qMap[a.question_id] || {};
-                    const images = imgMap[a.question_id] || [];
-                    return `
-                    <div class="question-card" style="page-break-inside:avoid;">
-                        <div class="question-number">Frage ${idx + 1}</div>
-                        ${images.length > 0 ? `<div class="operator-images">${images.map(i => `<div class="operator-image-box" onclick="openImageModal('${i.image_url}')"><img src="${i.image_url}" alt="Bild"></div>`).join('')}</div>` : ''}
-                        <div class="flex gap-2 mt-1">
-                            <span style="padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;${a.answer === 'gut' ? 'background:#d4edda;color:#155724;' : 'background:#f8d7da;color:#721c24;'}">
-                                ${a.answer === 'gut' ? 'Gut (IO)' : 'Nicht gut (NIO)'}
-                            </span>
-                            <span style="padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;${a.is_correct ? 'background:#d4edda;color:#155724;' : 'background:#f8d7da;color:#721c24;'}">
-                                ${a.is_correct ? 'RICHTIG' : 'FALSCH'}
-                            </span>
-                            <span style="font-size:12px;color:#6c757d;">Richtig: ${q.correct_answer === 'gut' ? 'Gut' : 'Nicht gut'}</span>
-                        </div>
-                        ${a.comment ? `<div style="margin-top:8px;font-size:13px;"><strong>Begruendung:</strong> ${a.comment}</div>` : ''}
-                    </div>`;
-                }).join('');
-            }
+        let qHTML='';
+        if(ans&&ans.length){
+            qHTML=ans.map((a,idx)=>{
+                const q=qm[a.question_id]||{};
+                const images=im[a.question_id]||[];
+                return `
+                <div class="question-card" style="page-break-inside:avoid">
+                    <div class="question-number">Frage ${idx+1}</div>
+                    ${images.length?`<div class="op-images">${images.map(i=>`<div class="op-img" onclick="openModal('${i.image_url}')"><img src="${i.image_url}" alt="Bild"></div>`).join('')}</div>`:''}
+                    <div class="flex gap-2 mt-1 flex-wrap">
+                        <span style="padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;${a.answer==='gut'?'background:#d4edda;color:#155724':'background:#f8d7da;color:#721c24'}">
+                            ${a.answer==='gut'?'Gut (IO)':'Nicht gut (NIO)'}
+                        </span>
+                        <span style="padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;${a.is_correct?'background:#d4edda;color:#155724':'background:#f8d7da;color:#721c24'}">
+                            ${a.is_correct?'RICHTIG':'FALSCH'}
+                        </span>
+                        <span class="text-muted" style="font-size:12px">Richtig: ${q.correct_answer==='gut'?'Gut':'Nicht gut'}</span>
+                    </div>
+                    ${a.selected_defects?`<div class="mt-1" style="font-size:12px"><strong>Grund:</strong> ${a.selected_defects}</div>`:''}
+                    ${a.comment?`<div style="margin-top:6px;font-size:12px"><strong>Kommentar:</strong> ${a.comment}</div>`:''}
+                    ${q.explanation?`<div class="explanation-box ${a.is_correct?'correct':'wrong'} mt-1"><strong>Erklaerung:</strong> ${q.explanation}</div>`:''}
+                </div>`;
+            }).join('');
         }
 
-        const card = document.getElementById('resultCard');
-        card.innerHTML = `
-            <div style="text-align:center;border-bottom:2px solid #e9ecef;padding-bottom:16px;margin-bottom:16px;">
-                <h2 style="color:#1e3a5f;margin-bottom:4px;">${test ? test.title : 'Test'}</h2>
-                <div class="text-muted">${test ? test.description : ''}</div>
+        $('resultCard').innerHTML=`
+            <div style="text-align:center;border-bottom:2px solid #e9ecef;padding-bottom:16px;margin-bottom:16px">
+                <h2 style="color:#1e3a5f;margin-bottom:4px">${test?test.title:'Test'}</h2>
+                <div class="text-muted">${test?test.description||'':''}</div>
             </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
-                <div class="stat-card">
-                    <div class="stat-number ${result.passed ? 'score-pass' : 'score-fail'}">${result.score}/${result.max_score}</div>
-                    <div class="stat-label">Punkte</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${Math.round((result.score / result.max_score) * 100)}%</div>
-                    <div class="stat-label">Ergebnis</div>
-                </div>
-                <div class="stat-card">
-                    <div style="font-size:18px;font-weight:700;padding:8px;border-radius:20px;${result.passed ? 'background:#d4edda;color:#155724;' : 'background:#f8d7da;color:#721c24;'}">
-                        ${result.passed ? 'BESTANDEN' : 'NICHT BESTANDEN'}
-                    </div>
-                    <div class="stat-label">Mindest: ${test ? test.passing_score : '?'} Punkte</div>
-                </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+                <div class="stat-card"><div class="stat-number ${r.passed?'score-pass':'score-fail'}">${r.score}/${r.max_score}</div><div class="stat-label">Punkte</div></div>
+                <div class="stat-card"><div class="stat-number">${Math.round((r.score/r.max_score)*100)}%</div><div class="stat-label">Ergebnis</div></div>
+                <div class="stat-card"><div style="font-size:18px;font-weight:700;padding:8px;border-radius:20px;${r.passed?'background:#d4edda;color:#155724':'background:#f8d7da;color:#721c24'}">${r.passed?'BESTANDEN':'NICHT BESTANDEN'}</div><div class="stat-label">Mindest: ${test?test.passing_score:'?'}</div></div>
             </div>
-
-            <div style="font-size:13px;color:#6c757d;margin-bottom:16px;">
-                Mitarbeiter: <strong>${result.operator_name || '-'}</strong> (${result.operator_number || '-'}) | Datum: ${formatDate(result.completed_at)} | Zeit: ${formatTime(result.time_seconds)}
+            <div style="font-size:13px;color:#6c757d;margin-bottom:16px">
+                Mitarbeiter: <strong>${r.operator_name||'-'}</strong> (${r.operator_number||'-'}) | ${fmtDate(r.completed_at)} | Zeit: ${fmtTime(r.time_seconds)}
             </div>
-
-            ${imgHTML}
-
-            ${result.operator_signature || result.examiner_signature ? `
-            <div class="mt-3" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;border-top:2px solid #e9ecef;padding-top:16px;">
-                ${result.operator_signature ? `<div class="text-center"><div style="font-weight:600;font-size:13px;margin-bottom:6px;">Unterschrift Mitarbeiter</div><img src="${result.operator_signature}" style="max-width:200px;border:1px solid #ccc;border-radius:4px;"></div>` : ''}
-                ${result.examiner_signature ? `<div class="text-center"><div style="font-weight:600;font-size:13px;margin-bottom:6px;">Unterschrift Pruefer</div><img src="${result.examiner_signature}" style="max-width:200px;border:1px solid #ccc;border-radius:4px;"></div>` : ''}
-            </div>` : ''}
-        `;
+            ${qHTML}
+            ${r.operator_signature||r.examiner_signature?`
+            <div class="mt-3" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;border-top:2px solid #e9ecef;padding-top:16px">
+                ${r.operator_signature?`<div class="text-center"><div style="font-weight:600;font-size:13px;margin-bottom:6px">Unterschrift Mitarbeiter</div><img src="${r.operator_signature}" style="max-width:200px;border:1px solid #ccc;border-radius:4px"></div>`:''}
+                ${r.examiner_signature?`<div class="text-center"><div style="font-weight:600;font-size:13px;margin-bottom:6px">Unterschrift Pruefer</div><img src="${r.examiner_signature}" style="max-width:200px;border:1px solid #ccc;border-radius:4px"></div>`:''}
+            </div>`:''}`;
 
         showView('viewResult');
-    } catch (err) {
-        alert('Fehler beim Laden des Ergebnisses: ' + err.message);
-    }
+    }catch(e){alert(e.message)}
 }
 
-function goBackAfterResult() {
-    if (currentRole === 'pruefer') showPrueferDashboard();
-    else showOperatorTests();
-}
+function goBack(){if(myRole==='pruefer')showPrueferDashboard();else showOpTests()}
 
 // ============================================================
-// PDF-EXPORT
+// PDF EXPORT
 // ============================================================
-async function exportResultPDF() {
-    if (typeof window.jspdf === 'undefined') {
-        alert('PDF-Bibliothek nicht geladen. Bitte Internetverbindung pruefen und Seite neu laden.');
-        return;
-    }
-
-    const btn = document.querySelector('.no-print');
-    if (btn) btn.style.display = 'none';
-
-    try {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
-
-        const container = document.getElementById('resultContainer');
-        const canvas = await html2canvas(container, {
-            scale: 1.5, useCORS: true, logging: false,
-            backgroundColor: '#ffffff', windowWidth: 1000
-        });
-
-        const imgData = canvas.toDataURL('image/jpeg', 0.85);
-        const imgWidth = 210;
-        const pageHeight = 297;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-
-        const name = (activeTest ? activeTest.title : 'AOI-Test').replace(/[^a-zA-Z0-9]/g, '_');
-        pdf.save(`AOI-Test_Ergebnis_${name}_${new Date().toISOString().split('T')[0]}.pdf`);
-    } catch (err) {
-        alert('PDF-Fehler: ' + err.message);
-    }
-
-    if (btn) btn.style.display = '';
+async function exportPDF(){
+    if(typeof window.jspdf==='undefined'){alert('PDF-Bibliothek nicht geladen. Seite neu laden.');return}
+    const nb=document.querySelector('.no-print');if(nb)nb.style.display='none';
+    try{
+        const {jsPDF}=window.jspdf;
+        const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+        const container=$('resultContainer');
+        const canvas=await html2canvas(container,{scale:1.5,useCORS:true,logging:false,backgroundColor:'#fff',windowWidth:1000});
+        const imgData=canvas.toDataURL('image/jpeg',.85);
+        const imgW=210,pageH=297,imgH=(canvas.height*imgW)/canvas.width;
+        let left=imgH,pos=0;
+        pdf.addImage(imgData,'JPEG',0,pos,imgW,imgH);left-=pageH;
+        while(left>0){pos=left-imgH;pdf.addPage();pdf.addImage(imgData,'JPEG',0,pos,imgW,imgH);left-=pageH}
+        pdf.save(`AOI-Test_${new Date().toISOString().split('T')[0]}.pdf`);
+    }catch(e){alert('PDF-Fehler: '+e.message)}
+    if(nb)nb.style.display='';
 }
 
 // ============================================================
-// BILD-MODAL
+// IMAGE MODAL
 // ============================================================
-function openImageModal(src) {
-    document.getElementById('modalImage').src = src;
-    document.getElementById('imageModal').classList.add('open');
-}
-function closeImageModal() {
-    document.getElementById('imageModal').classList.remove('open');
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImageModal(); });
+function openModal(src){$('modalImg').src=src;$('imgModal').classList.add('open')}
+function closeModal(){$('imgModal').classList.remove('open')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
 // ============================================================
-// INITIALISIERUNG
+// INIT
 // ============================================================
-document.addEventListener('DOMContentLoaded', function() {
-    initSigPad('sigOperator');
-    initSigPad('sigExaminer');
-    showView('viewLogin');
+document.addEventListener('DOMContentLoaded',()=>{
+    initSig('sigOp');initSig('sigEx');showView('viewLogin');
 });
 </script>
-
 </body>
 </html>
