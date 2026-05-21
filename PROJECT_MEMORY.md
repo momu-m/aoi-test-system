@@ -1,6 +1,6 @@
 # AOI-Test-System - Projekt-Gedaechtnis
 
-> **Letzte Aktualisierung:** 21.05.2026 (v2.4)
+> **Letzte Aktualisierung:** 21.05.2026 (v2.4 — fix_v23 + fix_v24 ausgefuehrt)
 > **Dieses Dokument dient als Kontext fuer neue Chat-Sitzungen. Lies alles ab hier.**
 
 ---
@@ -33,8 +33,8 @@
 - **setup.sql:** Initiales DB-Schema (6 Tabellen) — BEREITS AUSGEFUEHRT
 - **update_v2.sql:** v2 Updates (explanations, defects) — BEREITS AUSGEFUEHRT
 - **fix_v22.sql:** Delete-Policy + Admin-Account — **AUSGEFUEHRT**
-- **fix_v23.sql:** FK-Constraints ON DELETE SET NULL — **PRUEFEN OB AUSGEFUEHRT**
-- **fix_v24.sql:** DELETE-Policies fuer test_results + answers — **PRUEFEN OB AUSGEFUEHRT**
+- **fix_v23.sql:** FK-Constraints ON DELETE SET NULL — **AUSGEFUEHRT**
+- **fix_v24.sql:** DELETE-Policies fuer test_results + answers — **AUSGEFUEHRT**
 
 ### Referenz-Dateien (lokal, nicht im Repo)
 - **AOI-Fotos (267 Stueck):** `/Users/momu/html/aoi/KohYoung/FotosAOI/`
@@ -168,17 +168,16 @@ answers
 
 ## >>> WAS IST OFFEN / TODO? <<<
 
-### Sofort — User muss SQL ausfuehren
-- [ ] **fix_v23.sql** in Supabase SQL Editor ausfuehren (FK-Constraints)
-- [ ] **fix_v24.sql** in Supabase SQL Editor ausfuehren (DELETE-Policies fuer Ergebnisse)
-  - Anleitung: Supabase Dashboard → SQL Editor → SQL kopieren → Run
+### ~~Sofort — User muss SQL ausfuehren~~ → ALLES AUSGEFUEHRT
+- [x] **fix_v23.sql** — AUSGEFUEHRT
+- [x] **fix_v24.sql** — AUSGEFUEHRT
 
 ### Naechste Schritte
-- [ ] **267 AOI-Fotos importieren** von `/Users/momu/html/aoi/KohYoung/FotosAOI/` → Supabase Storage
-  - Dateien: p002-p025 Serie (KohYoung AOI-Maschine)
-  - Batch-Upload per Script moeglich
-  - Danach: Fotos in Test-Fragen verwendbar
-- [ ] **Erste echte Tests erstellen** mit den importierten Fotos
+- [x] **252 AOI-Fotos importiert** → Supabase Storage `aoi-images/aoi-photos/`
+  - URL-Pattern: `https://yrephxnnkifrmwkqyzsa.supabase.co/storage/v1/object/public/aoi-images/aoi-photos/{DATEINAME}`
+  - Dateien: p002_i001.png bis p160_i002.png (ohne "Kopie"-Dateien)
+  - Upload-Script: `upload-photos.js` im Projekt-Root
+- [ ] **Erste echte Tests erstellen** mit den importierten Fotos (in der App als Admin)
 - [ ] **Operatoren registrieren** (in der App: Benutzer verwalten)
 
 ### Spaeter (nice-to-have)
@@ -206,7 +205,7 @@ answers
 ## >>> GIT-HISTORIE <<<
 
 ```
-(TBD)    v2.4: Test-Ablauf umgestellt, Ergebnisse loeschen, Operator-Uebersicht
+84acaa3  v2.4: Test-Ablauf umgestellt, Ergebnisse loeschen, Operator-Uebersicht
 e1145b7  v2.3: FK-Constraints Fix, Logo im PDF, Benutzer-Editierung
 7ad734b  v2.2.1: Asetronics-Logo, SQL-Fix Admin-Rolle
 60b0a1d  v2.2: Admin-System, Benutzer-Loeschung, Zurueck-Buttons
