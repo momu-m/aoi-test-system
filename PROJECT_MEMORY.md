@@ -1,6 +1,6 @@
 # AOI-Test-System - Projekt-Gedaechtnis
 
-> **Letzte Aktualisierung:** 21.05.2026 (v2.3)
+> **Letzte Aktualisierung:** 21.05.2026 (v2.4)
 > **Dieses Dokument dient als Kontext fuer neue Chat-Sitzungen.**
 
 ---
@@ -50,7 +50,9 @@ Ein webbasiertes **AOI (Automated Optical Inspection) Test-/Trainingssystem** fu
 
 ### Wichtige RLS-Policies
 - Alle Tabellen erlauben anon read/write (vereinfacht, da keine Supabase Auth)
-- `fix_v22.sql` fuegt DELETE und UPDATE Policies fuer `users` hinzu
+- `fix_v22.sql`: DELETE + UPDATE Policies fuer `users`
+- `fix_v23.sql`: FK-Constraints ON DELETE SET NULL korrigiert
+- `fix_v24.sql`: DELETE Policies fuer `test_results` und `answers` (Admin kann Ergebnisse loeschen)
 
 ---
 
@@ -63,35 +65,25 @@ Ein webbasiertes **AOI (Automated Optical Inspection) Test-/Trainingssystem** fu
 - **Bilder upload**: Komprimierung auf max 1200px, Upload zu Supabase Storage
 - **Musterloesung** pro Frage: Gut (IO) oder Nicht gut (NIO)
 - **Erklaerung** pro Frage (wird Operator nach dem Test angezeigt)
-- **Benutzer verwalten**: Operatoren registrieren, entfernen
+- **Benutzer verwalten**: Operatoren UND Admins/Pruefer registrieren, Name/Nummer aendern, entfernen
 - **Ergebnisse einsehen**: Alle Testergebnisse mit Details
+- **Ergebnisse loeschen**: Einzelne Testergebnisse entfernen
+- **Operator-Uebersicht**: Alle Operatoren mit Statistiken (Durchschnitt, Bestanden/Fail, letzte Ergebnisse)
 - **PDF-Export**: jsPDF + html2canvas
 
-### Operator
-- **Login** mit Name + Mitarbeiternummer
-- **Testliste** sehen (nur aktive Tests)
-- **Test durchfuehren**:
-  - Timer laeuft automatisch (HH:MM:SS)
-  - Fortschrittsbalken
-  - Bilder zoombar (Klick = Vollbild)
-  - Antwort: Gut (IO) oder Nicht gut (NIO) — grosse Klick-Buttons
-  - Bei NIO: **vordefinierte Fehlerkategorien** als Klick-Chips:
-    - Loetfehler: Kalte Loetstelle, Zu viel Lot, Zu wenig Lot, Lotbruecke
-    - Platzierung: Bauteil fehlt, verdreht, verschoben, falsches, gekippt
-    - Reinigung: Flux-Reste, Kontamination
-    - Mechanisch: LP beschaedigt, Leiterbahn defekt
-    - Polaritaet: Pol falsch
-    - Sonstiges: Beschriftung fehlt, Sonstiger Fehler
-  - Optionaler Kommentar (Freitext)
-- **Unterschriften**: Canvas-basiert (Mitarbeiter + Pruefer)
-- **Validierung**: Alle Fragen beantwortet, bei NIO mindestens ein Grund, Unterschrift Pflicht
-- **Ergebnisansicht**: Score, Richtig/Falsch pro Frage, Erklaerung, Unterschriften
-- **Verlauf**: Letzte 10 Ergebnisse einsehbar
+### Operator — Test-Ablauf (v2.4)
+1. **Fragen beantworten**: IO/NIO + Fehlergruende, Timer laeuft
+2. **"Test abschliessen"** klicken → Timer stoppt, Fragen werden read-only
+3. **Resultat sehen**: Richtig/Falsch pro Frage, Erklaerung, Musterloesung (kann NICHT korrigiert werden)
+4. **Unterschreiben**: Unterschrift Mitarbeiter (Pflicht) + Pruefer (optional)
+5. **"Unterschreiben & Speichern"** → Ergebnis wird in DB gespeichert
+6. **Ergebnis-Ansicht**: TEST ABGESCHLOSSEN Banner, Score, PDF drucken, Test schliessen
 
 ### PDF-Export
 - Generiert PDF mit html2canvas (Screenshot der Ergebnis-Seite)
 - A4-Format, mehrseitig bei langen Tests
-- Enthaelt: Score, Fragen, Antworten, Bilder, Unterschriften
+- Enthaelt: Logo, Score, Fragen, Antworten, Bilder, Unterschriften
+- Buttons "PDF drucken" und "Test schliessen" erscheinen NICHT im PDF
 - Dateiname: `AOI-Test_YYYY-MM-DD.pdf`
 
 ---
@@ -109,18 +101,24 @@ Ein webbasiertes **AOI (Automated Optical Inspection) Test-/Trainingssystem** fu
 - [x] v2.3: FK-Constraints korrigiert (fix_v23.sql) — User-Loeschung trotz Testergebnissen
 - [x] v2.3: Logo im PDF-Export sichtbar
 - [x] v2.3: Benutzer-Daten editierbar (Name + Mitarbeiternummer aenderbar)
+- [x] v2.4: Test-Ablauf umgestellt: Antworten → Pruefen → Unterschreiben → Speichern
+- [x] v2.4: Richtig/Falsch pro Frage VOR der Unterschrift sichtbar (read-only)
+- [x] v2.4: Admin kann Testergebnisse loeschen
+- [x] v2.4: Operator-Uebersicht (Statistiken pro Operator)
+- [x] v2.4: Benutzerverwaltung mit Rollen-Waehler (Operator oder Admin/Pruefer)
+- [x] v2.4: PDF-Export ohne Buttons (no-print korrigiert)
 - [x] Alles committed und auf GitHub Pages deployed
-- [x] Alle Kernfunktionen vom User getestet und bestaetigt (PDF, Unterschriften, Timer, etc.)
 
 ---
 
 ## 5. Was ist OFFEN / TODO?
 
 ### Blockiert — User muss etwas tun
-- [ ] **fix_v23.sql in Supabase SQL Editor ausfuehren!**
-  - Korrigiert FK-Constraints damit Benutzer geloescht werden koennen (auch mit Testergebnissen)
-  - Anleitung: Supabase Dashboard → SQL Editor → fix_v23.sql kopieren → Run
-  - **fix_v22.sql wurde bereits ausgefuehrt** ✅
+- [ ] **fix_v23.sql in Supabase SQL Editor ausfuehren!** (falls noch nicht gemacht)
+  - Korrigiert FK-Constraints damit Benutzer geloescht werden koennen
+- [ ] **fix_v24.sql in Supabase SQL Editor ausfuehren!**
+  - Fuegt DELETE-Policies fuer `test_results` und `answers` hinzu
+  - Ohne dieses SQL: Loeschen-Button bei Ergebnissen funktioniert nicht
 
 ### Naechste Schritte
 - [ ] **267 AOI-Fotos importieren** von `/Users/momu/html/aoi/KohYoung/FotosAOI/` in Supabase Storage
@@ -133,7 +131,6 @@ Ein webbasiertes **AOI (Automated Optical Inspection) Test-/Trainingssystem** fu
 ### Spaetere Verbesserungen (nice-to-have)
 - [ ] Test-Ergebnisse als CSV exportieren (fuer Excel/Auswertung)
 - [ ] Test-Vorlagen (z.B. "Standard AOI Test" mit 30 Fragen)
-- [ ] Operator-Statistiken (Bestanden/Fail-Rate ueber Zeit)
 - [ ] Mehrere Sprachen (z.Zt. nur Deutsch, aber Operatoren sind international)
 - [ ] Bessere PDF-Formatierung (direkte jsPDF-Generierung statt Screenshot)
 - [ ] Echte Authentifizierung (Supabase Auth statt Name+Nummer)
@@ -144,11 +141,12 @@ Ein webbasiertes **AOI (Automated Optical Inspection) Test-/Trainingssystem** fu
 
 | Datei | Pfad | Beschreibung |
 |---|---|---|
-| `index.html` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/index.html` | Die komplette SPA (1058 Zeilen) |
+| `index.html` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/index.html` | Die komplette SPA (~1294 Zeilen) |
 | `setup.sql` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/setup.sql` | Initiale DB-Schema-Erstellung |
 | `update_v2.sql` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/update_v2.sql` | v2 Schema-Updates (explanations, defects) |
 | `fix_v22.sql` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/fix_v22.sql` | Fix: Delete-Policy + Admin-Account |
 | `fix_v23.sql` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/fix_v23.sql` | Fix: FK-Constraints ON DELETE SET NULL |
+| `fix_v24.sql` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/fix_v24.sql` | Fix: DELETE-Policies fuer Ergebnisse + Antworten |
 | `README.md` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/README.md` | Projektdokumentation |
 | `PROJECT_MEMORY.md` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/PROJECT_MEMORY.md` | **DIESE DATEI** — Kontext fuer neue Chats |
 
@@ -171,7 +169,7 @@ Ein webbasiertes **AOI (Automated Optical Inspection) Test-/Trainingssystem** fu
 - **Projekt-Kontext:** Dieses AOI-Test-System ist wahrscheinlich ein Schulungs-/IPERKA-Projekt im Rahmen der TEKO-Ausbildung
 - **Arbeitet mit:** KohYoung AOI-Maschine (C-Platform) in Belp bei Bern
 - **Muttersprache:** Nicht Deutsch — bevorzugt einfache, klare Anweisungen
-- **Präferenzen:**
+- **Praeferenzen:**
   - IPERKA-Methodik (Informat, Planen, Entscheiden, Realisieren, Kontrollieren, Auswerten)
   - SMART-Ziele
   - Pragmatischer Ansatz je nach Situation
@@ -183,7 +181,8 @@ Ein webbasiertes **AOI (Automated Optical Inspection) Test-/Trainingssystem** fu
 ## 8. Git-Historie (letzte Commits)
 
 ```
-(TBD) v2.3: FK-Constraints Fix, Logo im PDF, Benutzer-Editierung
+(TBD) v2.4: Test-Ablauf umgestellt, Ergebnisse loeschen, Operator-Uebersicht, Rollen-Waehler
+e1145b7 v2.3: FK-Constraints Fix, Logo im PDF, Benutzer-Editierung, Test-Abschluss-Flow verbessert
 7ad734b v2.2.1: Asetronics-Logo integriert, SQL-Fix fuer Admin-Rolle
 60b0a1d v2.2: Admin-System (keine Selbstregistrierung), Benutzer-Loeschung repariert, Zurueck-Buttons
 6c553ec v2.1: Registrierungssystem, vordefinierte Fehlerkategorien, erweiterte Validierung, Erklaerungen
@@ -207,6 +206,6 @@ d81fd3f README mit Einrichtungsanleitung und Dokumentation
 
 Wenn du diesen Chat fortsetzen willst:
 1. Lies diese Datei: `/Users/momu/html/aoi/KohYoung/aoi-test-system/PROJECT_MEMORY.md`
-2. Pruefe ob `fix_v22.sql` ausgefuehrt wurde (User fragen)
+2. Pruefe welche SQL-Fixes ausgefuehrt wurden (fix_v22, fix_v23, fix_v24) — User fragen
 3. Pruefe aktuellen Stand: `git log --oneline -5` im Projektverzeichnis
 4. Weiter mit dem naechsten offenen Punkt aus Abschnitt 5

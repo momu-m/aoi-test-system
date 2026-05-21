@@ -239,6 +239,7 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="showCreateTest()">+ Neuen Test erstellen</button>
                 <button class="btn btn-secondary" onclick="showPrueferResults()">Ergebnisse</button>
+                <button class="btn btn-outline" onclick="showOperatorOverview()">Operator-Uebersicht</button>
                 <button class="btn btn-outline" onclick="showUserMgmt()">Benutzer verwalten</button>
             </div>
         </div>
@@ -254,13 +255,17 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
                 <div class="card-header" style="margin:0;border:0;padding:0">Benutzer verwalten</div>
                 <button class="btn btn-secondary btn-sm" onclick="showPrueferDashboard()">Zurueck</button>
             </div>
-            <p class="text-muted mb-2" style="font-size:13px;">Hier koennen Sie Operatoren registrieren und entfernen. Nur registrierte Benutzer koennen sich anmelden.</p>
+            <p class="text-muted mb-2" style="font-size:13px;">Hier koennen Sie Benutzer registrieren und entfernen. Nur registrierte Benutzer koennen sich anmelden.</p>
             <div class="card" style="background:#f8f9fa;">
                 <div class="form-group">
-                    <label class="form-label">Neuen Operator registrieren</label>
+                    <label class="form-label">Neuen Benutzer registrieren</label>
                     <div class="flex gap-1 flex-wrap">
                         <input type="text" id="newUserName" class="form-input" placeholder="Name" style="max-width:200px">
                         <input type="text" id="newUserNumber" class="form-input" placeholder="Mitnr." style="max-width:120px">
+                        <select id="newUserRole" class="form-input" style="max-width:140px">
+                            <option value="operator">Operator</option>
+                            <option value="admin">Admin / Pruefer</option>
+                        </select>
                         <button class="btn btn-success" onclick="registerOperator()">Registrieren</button>
                     </div>
                 </div>
@@ -321,6 +326,20 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
     </div>
 </div>
 
+<!-- ==================== PRUEFER: OPERATOR UEBERSICHT ==================== -->
+<div id="viewOpOverview" class="view">
+    <div class="container">
+        <div class="card">
+            <div class="flex justify-between items-center mb-2">
+                <div class="card-header" style="margin:0;border:0;padding:0">Operator-Uebersicht</div>
+                <button class="btn btn-secondary btn-sm" onclick="showPrueferDashboard()">Zurueck</button>
+            </div>
+            <p class="text-muted mb-2" style="font-size:13px;">Alle Operatoren mit ihren Testergebnissen und Statistiken.</p>
+            <div id="opOverviewList"></div>
+        </div>
+    </div>
+</div>
+
 <!-- ==================== OPERATOR: TEST LISTE ==================== -->
 <div id="viewOpTests" class="view">
     <div class="container">
@@ -365,8 +384,13 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
                 </div>
             </div>
         </div>
-        <div class="btn-group mt-2 no-print">
-            <button class="btn btn-danger btn-lg" onclick="finalizeTest()" id="finalizeBtn" disabled>Test abschliessen</button>
+        <div class="btn-group mt-2 no-print" id="takeTestButtons">
+            <button class="btn btn-primary btn-lg" onclick="reviewTest()" id="reviewBtn" disabled>Test abschliessen</button>
+            <button class="btn btn-danger btn-sm" onclick="cancelTest()">Abbrechen</button>
+        </div>
+        <div class="btn-group mt-2 no-print" id="finalizeButtons" style="display:none">
+            <button class="btn btn-success btn-lg" onclick="finalizeTest()" id="finalizeBtn" disabled>Unterschreiben & Speichern</button>
+            <button class="btn btn-secondary btn-lg" onclick="backToTest()">Zurueck zum Test</button>
         </div>
     </div>
 </div>
@@ -403,6 +427,7 @@ let me = null, myRole = null;
 let editId = null, eqs = [], eqCnt = 0;
 let aTest = null, aQuestions = [], aImages = {}, aAnswers = {}, aResultId = null;
 let tInterval = null, tSeconds = 0;
+let isReviewMode = false;
 
 // VORDEFINIERTE FEHLERKATEGORIEN
 const DEFECTS = {
@@ -548,11 +573,12 @@ async function loadUsers(){
 
 async function registerOperator(){
     const name=$('newUserName').value.trim(), num=$('newUserNumber').value.trim();
+    const role=$('newUserRole').value;
     if(!name||!num){alert('Bitte Name und Nummer eingeben.');return}
     try{
         const {data:exists}=await db.from('users').select('id').eq('employee_number',num).single();
         if(exists){alert('Diese Mitarbeiternummer existiert bereits.');return}
-        await db.from('users').insert({name,employee_number:num,role:'operator'});
+        await db.from('users').insert({name,employee_number:num,role});
         $('newUserName').value='';$('newUserNumber').value='';
         await loadUsers();
     }catch(e){alert('Fehler: '+e.message)}
@@ -732,17 +758,30 @@ async function showPrueferResults(){
     showView('viewPrueferResults');const c=$('prueferResultsList');
     c.innerHTML='<div class="loading"><div class="spinner"></div>Laden...</div>';
     try{
-        const {data:results}=await db.from('test_results').select('*,tests(title)').order('completed_at',{ascending:false}).limit(100);
+        const {data:results}=await db.from('test_results').select('*,tests(title)').order('completed_at',{ascending:false}).limit(200);
         if(!results||!results.length){c.innerHTML='<div class="text-center text-muted">Keine Ergebnisse.</div>';return}
         c.innerHTML=results.map(r=>`
             <div class="result-card ${r.passed?'passed':'failed'}">
                 <div class="flex justify-between items-center">
                     <div><div style="font-weight:700;font-size:15px">${r.tests?r.tests.title:'Test'}</div><div class="text-muted" style="font-size:12px">${r.operator_name||'-'} (${r.operator_number||'-'}) | ${fmtDate(r.completed_at)} | Zeit: ${fmtTime(r.time_seconds)}</div></div>
                     <div class="text-center"><div class="result-score ${r.passed?'score-pass':'score-fail'}">${r.score}/${r.max_score}</div><div style="font-size:12px;font-weight:600;color:${r.passed?'#28a745':'#dc3545'}">${r.passed?'BESTANDEN':'NICHT BESTANDEN'}</div></div>
-                    <button class="btn btn-primary btn-sm" onclick="viewResult('${r.id}')">Details</button>
+                    <div class="flex gap-1">
+                        <button class="btn btn-primary btn-sm" onclick="viewResult('${r.id}')">Details</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteResult('${r.id}','${(r.operator_name||'').replace(/'/g,"\\'")}')">Loeschen</button>
+                    </div>
                 </div>
             </div>`).join('');
     }catch(e){c.innerHTML='<div style="color:#dc3545">'+e.message+'</div>'}
+}
+
+async function deleteResult(id, opName){
+    if(!confirm(`Ergebnis von "${opName}" wirklich loeschen?\n\nDies kann nicht rueckgaengig gemacht werden.`))return;
+    try{
+        await db.from('answers').delete().eq('result_id',id);
+        const {error}=await db.from('test_results').delete().eq('id',id);
+        if(error) throw error;
+        await showPrueferResults();
+    }catch(e){alert('Fehler beim Loeschen: '+e.message+'\n\nTipp: fix_v24.sql in Supabase ausfuehren.')}
 }
 
 // ============================================================
@@ -795,7 +834,7 @@ async function startTest(tid){
         if(!qs||!qs.length){alert('Keine Fragen.');return}
         const {data:imgs}=await db.from('question_images').select('*').in('question_id',qs.map(q=>q.id));
 
-        aTest=test;aQuestions=qs;aAnswers={};aImages={};aResultId=null;tSeconds=0;
+        aTest=test;aQuestions=qs;aAnswers={};aImages={};aResultId=null;tSeconds=0;isReviewMode=false;
         if(imgs)imgs.forEach(i=>{if(!aImages[i.question_id])aImages[i.question_id]=[];aImages[i.question_id].push(i)});
 
         if(tInterval)clearInterval(tInterval);
@@ -803,7 +842,10 @@ async function startTest(tid){
 
         $('takeTitle').textContent=test.title;
         $('sigSection').style.display='none';
-        $('finalizeBtn').disabled=true;
+        $('takeTestButtons').style.display='flex';
+        $('finalizeButtons').style.display='none';
+        $('reviewBtn').disabled=true;
+        $('testTimer').style.background='';
         $('warningBox').style.display='none';
         renderTakeQ();
         showView('viewTakeTest');
@@ -868,6 +910,7 @@ function updateProgress(){
 }
 
 function checkComplete(){
+    if(isReviewMode) return;
     const total=aQuestions.length;
     let answered=0, allValid=true, missing=[];
 
@@ -880,29 +923,126 @@ function checkComplete(){
         }
     }
 
-    // Unterschrift pruefen
-    const hasOpSig=sigPads.sigOp&&!sigPads.sigOp.isEmpty();
-    if(!hasOpSig&&answered===total&&allValid){missing.push('Unterschrift fehlt')}
-
-    const complete=answered===total&&allValid&&hasOpSig;
-    $('finalizeBtn').disabled=!complete;
+    const canReview=answered===total&&allValid;
+    $('reviewBtn').disabled=!canReview;
 
     // Warning
     const wb=$('warningBox');
-    if(!complete&&answered>0){
+    if(!canReview&&answered>0){
         wb.style.display='block';
         wb.textContent='Fehlt noch: '+missing.join(', ');
     }else{
         wb.style.display='none';
     }
-
-    if(answered===total&&allValid){$('sigSection').style.display='block'}
 }
 
 function cancelTest(){
     if(!confirm('Test abbrechen? Antworten gehen verloren.'))return;
     if(tInterval){clearInterval(tInterval);tInterval=null}
-    aTest=null;showOpTests();
+    aTest=null;isReviewMode=false;showOpTests();
+}
+
+// ============================================================
+// REVIEW MODE: Antworten pruefen vor Unterschrift
+// ============================================================
+function reviewTest(){
+    // Timer stoppen
+    if(tInterval){clearInterval(tInterval);tInterval=null}
+    isReviewMode=true;
+
+    // Timer-Anzeige aktualisieren (gestoppt)
+    $('testTimer').textContent='Abgeschlossen: '+fmtTime(tSeconds);
+    $('testTimer').style.background='linear-gradient(135deg,#28a745,#20c997)';
+
+    // Alle Fragen read-only machen + richtige Antworten anzeigen
+    aQuestions.forEach((q,i)=>{
+        const a=aAnswers[q.id]||{};
+        const card=document.getElementById('tq-'+q.id);
+        if(!card) return;
+
+        // IO/NIO Buttons deaktivieren
+        const gutBtn=document.getElementById('ans-'+q.id+'-gut');
+        const nioBtn=document.getElementById('ans-'+q.id+'-nicht_gut');
+        if(gutBtn){gutBtn.style.pointerEvents='none';gutBtn.style.opacity='0.6'}
+        if(nioBtn){nioBtn.style.pointerEvents='none';nioBtn.style.opacity='0.6'}
+
+        // Defect chips deaktivieren
+        document.querySelectorAll('[data-qid="'+q.id+'"]').forEach(c=>{c.style.pointerEvents='none';c.style.opacity='0.6'});
+
+        // Kommentar read-only
+        const cmt=$('cmt-'+q.id);
+        if(cmt){cmt.readOnly=true;cmt.style.opacity='0.6'}
+
+        // Richtig/Falsch Anzeige hinzufuegen
+        const isCorrect=a.answer===q.correct_answer;
+        const resultHTML=`<div style="margin-top:12px;padding:10px;border-radius:8px;border:2px solid ${isCorrect?'#28a745':'#dc3545'};background:${isCorrect?'#d4edda':'#f8d7da'}">
+            <div style="font-weight:700;font-size:14px;color:${isCorrect?'#155724':'#721c24'}">${isCorrect?'RICHTIG':'FALSCH'}</div>
+            <div style="font-size:12px;margin-top:4px">Ihre Antwort: <strong>${a.answer==='gut'?'Gut (IO)':'Nicht gut (NIO)'}</strong></div>
+            <div style="font-size:12px">Richtige Antwort: <strong>${q.correct_answer==='gut'?'Gut (IO)':'Nicht gut (NIO)'}</strong></div>
+            ${q.explanation?`<div style="font-size:11px;margin-top:4px;color:#495057"><strong>Erklaerung:</strong> ${q.explanation}</div>`:''}
+        </div>`;
+
+        // Pruef-Bereich am Ende der Fragekarte einfuegen
+        const existing=card.querySelector('.review-result');
+        if(!existing){
+            const div=document.createElement('div');
+            div.className='review-result';
+            div.innerHTML=resultHTML;
+            card.appendChild(div);
+        }
+    });
+
+    // Buttons umschalten
+    $('takeTestButtons').style.display='none';
+    $('finalizeButtons').style.display='flex';
+    $('finalizeBtn').disabled=true;
+
+    // Abbrechen-Button verstecken
+    const cancelBtns=document.querySelectorAll('#takeTestButtons .btn-danger');
+    cancelBtns.forEach(b=>b.style.display='none');
+
+    // Signatur-Sektion anzeigen
+    $('sigSection').style.display='block';
+
+    // Warning ausblenden
+    $('warningBox').style.display='none';
+
+    // Signatur-Check starten
+    checkSigComplete();
+}
+
+function backToTest(){
+    isReviewMode=false;
+
+    // Timer wieder starten
+    tInterval=setInterval(()=>{tSeconds++;$('testTimer').textContent='Benoetigte Zeit: '+fmtTime(tSeconds)},1000);
+    $('testTimer').style.background='linear-gradient(135deg,#6f42c1,#5a32a3)';
+
+    // Review-Elemente entfernen
+    document.querySelectorAll('.review-result').forEach(el=>el.remove());
+
+    // Buttons wieder aktivieren
+    aQuestions.forEach(q=>{
+        const gutBtn=document.getElementById('ans-'+q.id+'-gut');
+        const nioBtn=document.getElementById('ans-'+q.id+'-nicht_gut');
+        if(gutBtn){gutBtn.style.pointerEvents='';gutBtn.style.opacity=''}
+        if(nioBtn){nioBtn.style.pointerEvents='';nioBtn.style.opacity=''}
+        document.querySelectorAll('[data-qid="'+q.id+'"]').forEach(c=>{c.style.pointerEvents='';c.style.opacity=''});
+        const cmt=$('cmt-'+q.id);
+        if(cmt){cmt.readOnly=false;cmt.style.opacity=''}
+    });
+
+    // Buttons umschalten
+    $('takeTestButtons').style.display='flex';
+    $('finalizeButtons').style.display='none';
+    $('sigSection').style.display='none';
+
+    checkComplete();
+}
+
+function checkSigComplete(){
+    const hasOpSig=sigPads.sigOp&&!sigPads.sigOp.isEmpty();
+    $('finalizeBtn').disabled=!hasOpSig;
 }
 
 // ============================================================
@@ -924,12 +1064,15 @@ function initSig(id){
     sigPads[id]={canvas:cv,ctx,isEmpty:()=>empty,clear:()=>{ctx.clearRect(0,0,cv.width,cv.height);empty=true},toDataURL:()=>cv.toDataURL()};
 }
 
-function clearSig(id){if(sigPads[id])sigPads[id].clear();checkComplete()}
+function clearSig(id){if(sigPads[id])sigPads[id].clear();if(isReviewMode)checkSigComplete();else checkComplete()}
 
 // ============================================================
 // TEST ABSCHLIESSEN
 // ============================================================
 async function finalizeTest(){
+    const hasOpSig=sigPads.sigOp&&!sigPads.sigOp.isEmpty();
+    if(!hasOpSig){alert('Bitte unterschreiben Sie zuerst.');return}
+
     // Nochmal alles pruefen
     const total=aQuestions.length;
     let score=0;const answersData=[];
@@ -952,9 +1095,9 @@ async function finalizeTest(){
     const opSig=sigPads.sigOp&&!sigPads.sigOp.isEmpty()?sigPads.sigOp.toDataURL():null;
     const exSig=sigPads.sigEx&&!sigPads.sigEx.isEmpty()?sigPads.sigEx.toDataURL():null;
 
-    if(tInterval){clearInterval(tInterval);tInterval=null}
-
-    if(!confirm(`Test abschliessen?\n\nPunkte: ${score}/${maxScore}\n${passed?'BESTANDEN':'NICHT BESTANDEN'}\nZeit: ${fmtTime(tSeconds)}\n\nUnterschriften werden gespeichert.`))return;
+    // Button deaktivieren waehrend Speicherung
+    $('finalizeBtn').disabled=true;
+    $('finalizeBtn').textContent='Wird gespeichert...';
 
     try{
         const {data:rd,error}=await db.from('test_results').insert({
@@ -970,8 +1113,9 @@ async function finalizeTest(){
         }
 
         aResultId=rd.id;
+        isReviewMode=false;
         viewResult(rd.id);
-    }catch(e){alert('Fehler: '+e.message)}
+    }catch(e){alert('Fehler: '+e.message);$('finalizeBtn').disabled=false;$('finalizeBtn').textContent='Unterschreiben & Speichern'}
 }
 
 // ============================================================
@@ -1054,11 +1198,61 @@ async function viewResult(rid){
 function goBack(){if(myRole==='admin')showPrueferDashboard();else showOpTests()}
 
 // ============================================================
+// OPERATOR UEBERSICHT (Admin)
+// ============================================================
+async function showOperatorOverview(){
+    showView('viewOpOverview');const c=$('opOverviewList');
+    c.innerHTML='<div class="loading"><div class="spinner"></div>Laden...</div>';
+    try{
+        const {data:users}=await db.from('users').select('*').eq('role','operator').order('name');
+        if(!users||!users.length){c.innerHTML='<div class="text-center text-muted">Keine Operatoren registriert.</div>';return}
+
+        const {data:results}=await db.from('test_results').select('*,tests(title)').order('completed_at',{ascending:false});
+        const {data:allTests}=await db.from('tests').select('*');
+
+        c.innerHTML=users.map(u=>{
+            const uResults=(results||[]).filter(r=>r.operator_id===u.id);
+            const totalTests=uResults.length;
+            const passed=uResults.filter(r=>r.passed).length;
+            const failed=totalTests-passed;
+            const avgScore=totalTests?Math.round(uResults.reduce((s,r)=>s+(r.score/r.max_score)*100,0)/totalTests):0;
+
+            return `
+            <div class="card" style="margin-bottom:16px;border-left:4px solid ${totalTests===0?'#6c757d':passed>failed?'#28a745':'#dc3545'}">
+                <div class="flex justify-between items-center mb-1">
+                    <div>
+                        <div style="font-weight:700;font-size:16px;color:#1e3a5f">${u.name}</div>
+                        <div class="text-muted" style="font-size:12px">Mitnr: ${u.employee_number}</div>
+                    </div>
+                    <div style="text-align:center">
+                        <div style="font-size:24px;font-weight:700;color:${avgScore>=80?'#28a745':avgScore>=50?'#ffc107':'#dc3545'}">${avgScore}%</div>
+                        <div class="text-muted" style="font-size:11px">Durchschnitt</div>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0">
+                    <div style="text-align:center;padding:8px;background:#f8f9fa;border-radius:6px"><div style="font-weight:700;font-size:18px">${totalTests}</div><div style="font-size:11px;color:#6c757d">Tests</div></div>
+                    <div style="text-align:center;padding:8px;background:#d4edda;border-radius:6px"><div style="font-weight:700;font-size:18px;color:#155724">${passed}</div><div style="font-size:11px;color:#155724">Bestanden</div></div>
+                    <div style="text-align:center;padding:8px;background:#f8d7da;border-radius:6px"><div style="font-weight:700;font-size:18px;color:#721c24">${failed}</div><div style="font-size:11px;color:#721c24">Nicht best.</div></div>
+                </div>
+                ${uResults.length?`<div style="border-top:1px solid #e9ecef;padding-top:8px">
+                    <div style="font-size:12px;font-weight:600;margin-bottom:6px">Letzte Ergebnisse:</div>
+                    ${uResults.slice(0,5).map(r=>`
+                    <div class="flex justify-between items-center" style="padding:4px 0;font-size:12px">
+                        <span>${r.tests?r.tests.title:'Test'} <span class="text-muted">${fmtDate(r.completed_at)}</span></span>
+                        <span style="font-weight:600;color:${r.passed?'#28a745':'#dc3545'}">${r.score}/${r.max_score} ${r.passed?'BESTANDEN':'FALL'}</span>
+                    </div>`).join('')}
+                </div>`:'<div class="text-muted" style="font-size:12px">Noch keine Tests durchgefuehrt.</div>'}
+            </div>`;
+        }).join('');
+    }catch(e){c.innerHTML='<div style="color:#dc3545">'+e.message+'</div>'}
+}
+
+// ============================================================
 // PDF EXPORT
 // ============================================================
 async function exportPDF(){
     if(typeof window.jspdf==='undefined'){alert('PDF-Bibliothek nicht geladen. Seite neu laden.');return}
-    const nb=document.querySelector('.no-print');if(nb)nb.style.display='none';
+    document.querySelectorAll('.no-print').forEach(el=>el.style.display='none');
     try{
         const {jsPDF}=window.jspdf;
         const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
@@ -1071,7 +1265,7 @@ async function exportPDF(){
         while(left>0){pos=left-imgH;pdf.addPage();pdf.addImage(imgData,'JPEG',0,pos,imgW,imgH);left-=pageH}
         pdf.save(`AOI-Test_${new Date().toISOString().split('T')[0]}.pdf`);
     }catch(e){alert('PDF-Fehler: '+e.message)}
-    if(nb)nb.style.display='';
+    document.querySelectorAll('.no-print').forEach(el=>el.style.display='');
 }
 
 // ============================================================
@@ -1086,6 +1280,14 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 // ============================================================
 document.addEventListener('DOMContentLoaded',()=>{
     initSig('sigOp');initSig('sigEx');showView('viewLogin');
+    // Signatur-Events fuer finalize-Aktivierung im Review-Mode
+    ['sigOp','sigEx'].forEach(sid=>{
+        const cv=document.getElementById(sid);
+        if(cv){
+            cv.addEventListener('mouseup',()=>{if(isReviewMode)setTimeout(checkSigComplete,100)});
+            cv.addEventListener('touchend',()=>{if(isReviewMode)setTimeout(checkSigComplete,100)});
+        }
+    });
 });
 </script>
 </body>
