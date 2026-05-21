@@ -1,211 +1,242 @@
 # AOI-Test-System - Projekt-Gedaechtnis
 
 > **Letzte Aktualisierung:** 21.05.2026 (v2.4)
-> **Dieses Dokument dient als Kontext fuer neue Chat-Sitzungen.**
+> **Dieses Dokument dient als Kontext fuer neue Chat-Sitzungen. Lies alles ab hier.**
 
 ---
 
-## 1. Was ist dieses Projekt?
+## >>> WICHTIGE LINKS & ZUGANGSDATEN (fuer neuen Chat kopieren) <<<
 
-Ein webbasiertes **AOI (Automated Optical Inspection) Test-/Trainingssystem** fuer **Asetronics AG** in Belp bei Bern. Es wird verwendet, um Operatoren (Mitarbeiter an AOI-Maschinen) zu pruefen und zu schulen.
+### Live-App & Hosting
+- **App (Live):** https://momu-m.github.io/aoi-test-system/
+- **GitHub Repo:** https://github.com/momu-m/aoi-test-system
+- **GitHub Pages deployed from:** Branch `main`, Root `/`
 
-### Situation bei Asetronics
+### Supabase (Datenbank + Storage)
+- **Supabase Dashboard:** https://supabase.com/dashboard/project/yrephxnnkifrmwkqyzsa
+- **Supabase Project URL:** `https://yrephxnnkifrmwkqyzsa.supabase.co`
+- **Supabase Anon Key (public):** `sb_publishable_nFZwPKhntA1nzMbcqWJfUg_I9JyM7WD`
+- **Supabase Storage Bucket:** `aoi-images`
+- **Projekt-Referenz-ID:** `yrephxnnkifrmwkqyzsa`
+
+### Admin-Login (fuer Tests)
+- **Name:** `Mohamad Murad`
+- **Mitarbeiternummer:** `Mohamad89n`
+- **Rolle:** `admin` (einziger Admin im System)
+
+### Projekt-Verzeichnis (lokal)
+- **Projekt-Root:** `/Users/momu/html/aoi/KohYoung/aoi-test-system/`
+- **Hauptdatei:** `/Users/momu/html/aoi/KohYoung/aoi-test-system/index.html`
+- **Diese Datei:** `/Users/momu/html/aoi/KohYoung/aoi-test-system/PROJECT_MEMORY.md`
+
+### SQL-Dateien (muessen in Supabase SQL Editor ausgefuehrt werden)
+- **setup.sql:** Initiales DB-Schema (6 Tabellen) — BEREITS AUSGEFUEHRT
+- **update_v2.sql:** v2 Updates (explanations, defects) — BEREITS AUSGEFUEHRT
+- **fix_v22.sql:** Delete-Policy + Admin-Account — **AUSGEFUEHRT**
+- **fix_v23.sql:** FK-Constraints ON DELETE SET NULL — **PRUEFEN OB AUSGEFUEHRT**
+- **fix_v24.sql:** DELETE-Policies fuer test_results + answers — **PRUEFEN OB AUSGEFUEHRT**
+
+### Referenz-Dateien (lokal, nicht im Repo)
+- **AOI-Fotos (267 Stueck):** `/Users/momu/html/aoi/KohYoung/FotosAOI/`
+- **Original Offline-Version:** `/Users/momu/html/AOI_Test/AOI-Test_MIT_TIMER_UND_UNTERSCHRIFT.html`
+- **KI-Anweisungen:** `/Users/momu/html/ki/Ki/Anweisungen für Claude.md`
+- **Projektregeln (IPERKA/SMART):** `/Users/momu/html/ki/Ki/projekten.md`
+- **KohYoung Handbuch:** `/Users/momu/html/aoi/KohYoung/KohYoung_AOI_Bedienerhandbuch_dt_Ver1.0_[C-Platform]_M_size.pdf`
+
+---
+
+## >>> WAS IST DIESER PROJEKT? <<<
+
+**AOI (Automated Optical Inspection) Test-/Trainingssystem** fuer **Asetronics AG**, Belp bei Bern.
+
 - Asetronics stellt Leiterplatten (PCBs) her
-- AOI-Maschine: KohYoung (Modell C-Platform)
-- Die Operatoren sind **keine deutschen Muttersprachler** — deshalb muessen Eingaben einfach sein (Klick-Buttons statt Freitext)
-- Es gibt **nur EINEN Admin** (Mohamad Murad) — alle anderen sind Operatoren
-- Das System muss **100% kostenlos** sein (keine bezahlten Dienste)
+- AOI-Maschine: KohYoung C-Platform
+- Operatoren pruefen Leiterplatten visuell — dieses System testet/trainiert ihre Faehigkeiten
+- Operatoren sind **keine deutschen Muttersprachler** → einfache Klick-Buttons statt Freitext
+- **Nur EIN Admin** (Mohamad Murad) — alle anderen sind Operatoren
+- **100% kostenlos** — kein bezahlter Service
 
 ### Technologie-Stack
-| Komponente | Technologie | Kosten |
-|---|---|---|
-| Frontend | Single-Page App (eine index.html) | Kostenlos |
-| Hosting | GitHub Pages | Kostenlos |
-| Datenbank | Supabase (PostgreSQL) | Kostenlos (Free Tier) |
-| Bildspeicher | Supabase Storage (`aoi-images`) | Kostenlos (Free Tier) |
-| PDF-Export | jsPDF + html2canvas (CDN) | Kostenlos |
-| Unterschriften | HTML5 Canvas (Draw-on-Pad) | Kostenlos |
-
-### URLs
-- **Live-App:** https://momu-m.github.io/aoi-test-system/
-- **GitHub Repo:** https://github.com/momu-m/aoi-test-system (Branch: main)
-- **Supabase Dashboard:** https://supabase.com/dashboard/project/yrephxnnkifrmwkqyzsa
-- **Supabase Anon Key:** `sb_publishable_nFZwPKhntA1nzMbcqWJfUg_I9JyM7WD`
-- **Supabase URL:** `https://yrephxnnkifrmwkqyzsa.supabase.co`
-
----
-
-## 2. Datenbank-Schema (Supabase)
-
-6 Tabellen:
-
-| Tabelle | Beschreibung |
+| Was | Technologie |
 |---|---|
-| `users` | Benutzer mit `role` ('admin' oder 'operator'), `name`, `employee_number` |
-| `tests` | Tests mit `title`, `description`, `passing_score`, `is_active`, `created_by` |
-| `questions` | Fragen pro Test mit `question_number`, `correct_answer` ('gut'/'nicht_gut'), `explanation` |
-| `question_images` | Bilder pro Frage (URL aus Supabase Storage) |
-| `test_results` | Testergebnisse mit Score, Passed/Failed, Zeit, Unterschriften (Base64) |
-| `answers` | Einzelne Antworten pro Frage mit `selected_defects`, `comment`, `is_correct` |
-
-### Wichtige RLS-Policies
-- Alle Tabellen erlauben anon read/write (vereinfacht, da keine Supabase Auth)
-- `fix_v22.sql`: DELETE + UPDATE Policies fuer `users`
-- `fix_v23.sql`: FK-Constraints ON DELETE SET NULL korrigiert
-- `fix_v24.sql`: DELETE Policies fuer `test_results` und `answers` (Admin kann Ergebnisse loeschen)
+| Frontend | Single HTML-Datei (index.html, ~1294 Zeilen) |
+| Hosting | GitHub Pages (kostenlos) |
+| Datenbank | Supabase PostgreSQL (Free Tier) |
+| Bildspeicher | Supabase Storage Bucket `aoi-images` |
+| PDF-Export | jsPDF + html2canvas (CDN) |
+| Unterschriften | HTML5 Canvas (Zeichnen) |
+| Auth | Keine echte Auth — Login mit Name+Nummer, Rolle aus DB |
 
 ---
 
-## 3. Funktionen (Features)
+## >>> DATENBANK-SCHEMA <<<
+
+6 Tabellen in Supabase:
+
+```
+users
+├── id (uuid, PK)
+├── name (text)
+├── employee_number (text, unique)
+├── role (text: 'admin' | 'operator')
+└── created_at
+
+tests
+├── id (uuid, PK)
+├── title, description, passing_score, is_active
+├── created_by → users.id
+└── created_at, updated_at
+
+questions
+├── id (uuid, PK)
+├── test_id → tests.id
+├── question_number, correct_answer ('gut'|'nicht_gut'), explanation
+└── sort_order
+
+question_images
+├── id (uuid, PK)
+├── question_id → questions.id
+├── image_url (text, public URL aus Storage)
+└── image_order
+
+test_results
+├── id (uuid, PK)
+├── test_id → tests.id
+├── operator_id → users.id (ON DELETE SET NULL)
+├── operator_name, operator_number
+├── score, max_score, passed, time_seconds
+├── operator_signature, examiner_signature (Base64 text)
+├── finalized (boolean)
+└── completed_at
+
+answers
+├── id (uuid, PK)
+├── result_id → test_results.id
+├── question_id → questions.id
+├── answer, is_correct, selected_defects, comment
+```
+
+### RLS-Policies (Row Level Security)
+- Alle Tabellen: anon SELECT, INSERT, UPDATE erlaubt
+- `users`: DELETE erlaubt (fix_v22.sql)
+- `test_results` + `answers`: DELETE erlaubt (fix_v24.sql)
+- Kein Supabase Auth — anon Key wird verwendet
+
+---
+
+## >>> FEATURES <<<
 
 ### Admin (Mohamad Murad)
-- **Login** mit Name + Mitarbeiternummer (Rolle kommt aus DB, kein Waehler)
-- **Dashboard** mit Test-Uebersicht (aktiv/inaktiv)
-- **Tests erstellen/bearbeiten**: Titel, Beschreibung, Mindestpunktzahl, Fragen mit Bildern
-- **Bilder upload**: Komprimierung auf max 1200px, Upload zu Supabase Storage
-- **Musterloesung** pro Frage: Gut (IO) oder Nicht gut (NIO)
-- **Erklaerung** pro Frage (wird Operator nach dem Test angezeigt)
-- **Benutzer verwalten**: Operatoren UND Admins/Pruefer registrieren, Name/Nummer aendern, entfernen
-- **Ergebnisse einsehen**: Alle Testergebnisse mit Details
-- **Ergebnisse loeschen**: Einzelne Testergebnisse entfernen
-- **Operator-Uebersicht**: Alle Operatoren mit Statistiken (Durchschnitt, Bestanden/Fail, letzte Ergebnisse)
-- **PDF-Export**: jsPDF + html2canvas
+- Login mit Name + Mitarbeiternummer → Rolle aus DB
+- Dashboard: Test-Uebersicht, aktiv/inaktiv umschalten
+- Tests erstellen/bearbeiten: Fragen, Bilder upload, Musterloesung, Erklaerung
+- Benutzer verwalten: Operatoren + Admins registrieren, Name/Nummer aendern, entfernen
+- Ergebnisse einsehen + loeschen
+- Operator-Uebersicht: Statistiken pro Operator
+- PDF-Export
 
 ### Operator — Test-Ablauf (v2.4)
-1. **Fragen beantworten**: IO/NIO + Fehlergruende, Timer laeuft
-2. **"Test abschliessen"** klicken → Timer stoppt, Fragen werden read-only
-3. **Resultat sehen**: Richtig/Falsch pro Frage, Erklaerung, Musterloesung (kann NICHT korrigiert werden)
-4. **Unterschreiben**: Unterschrift Mitarbeiter (Pflicht) + Pruefer (optional)
-5. **"Unterschreiben & Speichern"** → Ergebnis wird in DB gespeichert
-6. **Ergebnis-Ansicht**: TEST ABGESCHLOSSEN Banner, Score, PDF drucken, Test schliessen
+1. Fragen beantworten: IO/NIO + Fehlergruende als Klick-Chips, Timer laeuft
+2. "Test abschliessen" → Timer stoppt, Fragen werden read-only
+3. Resultat sehen: Richtig/Falsch pro Frage, Erklaerung, Musterloesung
+4. Unterschreiben: Unterschrift Mitarbeiter (Pflicht) + Pruefer (optional)
+5. "Unterschreiben & Speichern" → Ergebnis in DB gespeichert
+6. Ergebnis-Ansicht: TEST ABGESCHLOSSEN Banner, Score, PDF drucken
 
-### PDF-Export
-- Generiert PDF mit html2canvas (Screenshot der Ergebnis-Seite)
-- A4-Format, mehrseitig bei langen Tests
-- Enthaelt: Logo, Score, Fragen, Antworten, Bilder, Unterschriften
-- Buttons "PDF drucken" und "Test schliessen" erscheinen NICHT im PDF
-- Dateiname: `AOI-Test_YYYY-MM-DD.pdf`
+### Vordefinierte Fehlerkategorien (Klick-Chips bei NIO)
+- **Loetfehler:** Kalte Loetstelle, Zu viel Lot, Zu wenig Lot, Lotbruecke
+- **Platzierung:** Bauteil fehlt, verdreht, verschoben, falsches, gekippt
+- **Reinigung:** Flux-Reste, Kontamination
+- **Mechanisch:** LP beschaedigt, Leiterbahn defekt
+- **Polaritaet:** Pol falsch
+- **Sonstiges:** Beschriftung fehlt, Sonstiger Fehler
 
 ---
 
-## 4. Was ist ERLEDIGT?
+## >>> WAS IST ERLEDIGT? <<<
 
-- [x] Komplette SPA (index.html) mit allen Funktionen
-- [x] Supabase-Datenbank mit 6 Tabellen (setup.sql)
-- [x] v2.1: Fehlerkategorien als Klick-Chips, Validierung, Erklaerungen, Registrierung
-- [x] v2.2: Admin-only System (keine Selbstregistrierung als Admin)
-- [x] v2.2: Zurueck-Buttons auf allen Seiten
-- [x] v2.2: Benutzer-Loeschung (mit fix_v22.sql)
-- [x] v2.2.1: Asetronics-Logo integriert
-- [x] v2.2.1: fix_v22.sql ausgefuehrt (Admin-Account + Delete-Policy)
-- [x] v2.3: FK-Constraints korrigiert (fix_v23.sql) — User-Loeschung trotz Testergebnissen
-- [x] v2.3: Logo im PDF-Export sichtbar
-- [x] v2.3: Benutzer-Daten editierbar (Name + Mitarbeiternummer aenderbar)
-- [x] v2.4: Test-Ablauf umgestellt: Antworten → Pruefen → Unterschreiben → Speichern
-- [x] v2.4: Richtig/Falsch pro Frage VOR der Unterschrift sichtbar (read-only)
-- [x] v2.4: Admin kann Testergebnisse loeschen
-- [x] v2.4: Operator-Uebersicht (Statistiken pro Operator)
-- [x] v2.4: Benutzerverwaltung mit Rollen-Waehler (Operator oder Admin/Pruefer)
-- [x] v2.4: PDF-Export ohne Buttons (no-print korrigiert)
+- [x] Komplette SPA mit Supabase-Backend
+- [x] v2.0: Basis-System (Tests, Fragen, Bilder, PDF, Unterschriften)
+- [x] v2.1: Fehlerkategorien, Validierung, Erklaerungen, Registrierung
+- [x] v2.2: Admin-only System, Zurueck-Buttons, Delete-Fix
+- [x] v2.2.1: Asetronics-Logo, fix_v22.sql
+- [x] v2.3: FK-Constraints Fix, Logo im PDF, Benutzer-Editierung
+- [x] v2.4: Neuer Test-Ablauf (pruefen vor unterschreiben), Ergebnisse loeschen, Operator-Uebersicht, Rollen-Waehler
 - [x] Alles committed und auf GitHub Pages deployed
 
 ---
 
-## 5. Was ist OFFEN / TODO?
+## >>> WAS IST OFFEN / TODO? <<<
 
-### Blockiert — User muss etwas tun
-- [ ] **fix_v23.sql in Supabase SQL Editor ausfuehren!** (falls noch nicht gemacht)
-  - Korrigiert FK-Constraints damit Benutzer geloescht werden koennen
-- [ ] **fix_v24.sql in Supabase SQL Editor ausfuehren!**
-  - Fuegt DELETE-Policies fuer `test_results` und `answers` hinzu
-  - Ohne dieses SQL: Loeschen-Button bei Ergebnissen funktioniert nicht
+### Sofort — User muss SQL ausfuehren
+- [ ] **fix_v23.sql** in Supabase SQL Editor ausfuehren (FK-Constraints)
+- [ ] **fix_v24.sql** in Supabase SQL Editor ausfuehren (DELETE-Policies fuer Ergebnisse)
+  - Anleitung: Supabase Dashboard → SQL Editor → SQL kopieren → Run
 
 ### Naechste Schritte
-- [ ] **267 AOI-Fotos importieren** von `/Users/momu/html/aoi/KohYoung/FotosAOI/` in Supabase Storage
-  - Dateien: p002-p025 Serie (Bilder von KohYoung AOI-Maschine)
-  - Import per Script moeglich (Supabase JS SDK + Batch-Upload)
-  - Danach koennen die Fotos in Test-Fragen verwendet werden
+- [ ] **267 AOI-Fotos importieren** von `/Users/momu/html/aoi/KohYoung/FotosAOI/` → Supabase Storage
+  - Dateien: p002-p025 Serie (KohYoung AOI-Maschine)
+  - Batch-Upload per Script moeglich
+  - Danach: Fotos in Test-Fragen verwendbar
 - [ ] **Erste echte Tests erstellen** mit den importierten Fotos
 - [ ] **Operatoren registrieren** (in der App: Benutzer verwalten)
 
-### Spaetere Verbesserungen (nice-to-have)
-- [ ] Test-Ergebnisse als CSV exportieren (fuer Excel/Auswertung)
-- [ ] Test-Vorlagen (z.B. "Standard AOI Test" mit 30 Fragen)
-- [ ] Mehrere Sprachen (z.Zt. nur Deutsch, aber Operatoren sind international)
-- [ ] Bessere PDF-Formatierung (direkte jsPDF-Generierung statt Screenshot)
-- [ ] Echte Authentifizierung (Supabase Auth statt Name+Nummer)
+### Spaeter (nice-to-have)
+- [ ] CSV-Export fuer Excel-Auswertung
+- [ ] Test-Vorlagen
+- [ ] Mehrsprachigkeit (Operatoren sind international)
+- [ ] Bessere PDF (Vektor statt Screenshot)
+- [ ] Echte Authentifizierung (Supabase Auth)
 
 ---
 
-## 6. Dateien im Projekt
-
-| Datei | Pfad | Beschreibung |
-|---|---|---|
-| `index.html` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/index.html` | Die komplette SPA (~1294 Zeilen) |
-| `setup.sql` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/setup.sql` | Initiale DB-Schema-Erstellung |
-| `update_v2.sql` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/update_v2.sql` | v2 Schema-Updates (explanations, defects) |
-| `fix_v22.sql` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/fix_v22.sql` | Fix: Delete-Policy + Admin-Account |
-| `fix_v23.sql` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/fix_v23.sql` | Fix: FK-Constraints ON DELETE SET NULL |
-| `fix_v24.sql` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/fix_v24.sql` | Fix: DELETE-Policies fuer Ergebnisse + Antworten |
-| `README.md` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/README.md` | Projektdokumentation |
-| `PROJECT_MEMORY.md` | `/Users/momu/html/aoi/KohYoung/aoi-test-system/PROJECT_MEMORY.md` | **DIESE DATEI** — Kontext fuer neue Chats |
-
-### Wichtige Referenz-Dateien (ausserhalb des Repos)
-| Datei | Pfad | Beschreibung |
-|---|---|---|
-| AOI-Fotos | `/Users/momu/html/aoi/KohYoung/FotosAOI/` | 267 Bilder zum Importieren |
-| Original HTML | `/Users/momu/html/AOI_Test/AOI-Test_MIT_TIMER_UND_UNTERSCHRIFT.html` | Offline-Version (Validierungs-Referenz) |
-| Anweisungen | `/Users/momu/html/ki/Ki/Anweisungen für Claude.md` | Regeln fuer KI-Assistenz |
-| Projektregeln | `/Users/momu/html/ki/Ki/projekten.md` | IPERKA/SMART-Methodik |
-| AOI-Handbuch | `/Users/momu/html/aoi/KohYoung/KohYoung_AOI_Bedienerhandbuch_dt_Ver1.0_[C-Platform]_M_size.pdf` | KohYoung Bedienungsanleitung |
-
----
-
-## 7. Kontext: Wer ist der User?
+## >>> KONTEXT: USER <<<
 
 - **Name:** Mohamad Murad
-- **Rolle bei Asetronics AG:** Betriebstechniker (Operating Technician)
-- **Ausbildung:** Studiert an der TEKO Bern (Schweiz)
-- **Projekt-Kontext:** Dieses AOI-Test-System ist wahrscheinlich ein Schulungs-/IPERKA-Projekt im Rahmen der TEKO-Ausbildung
-- **Arbeitet mit:** KohYoung AOI-Maschine (C-Platform) in Belp bei Bern
-- **Muttersprache:** Nicht Deutsch — bevorzugt einfache, klare Anweisungen
-- **Praeferenzen:**
-  - IPERKA-Methodik (Informat, Planen, Entscheiden, Realisieren, Kontrollieren, Auswerten)
-  - SMART-Ziele
-  - Pragmatischer Ansatz je nach Situation
-  - Einfaches Deutsch, Schritt-fuer-Schritt-Erklaerungen
-  - Keine langen Hin-und-Her-Gespraeche — direkt zur Sache
+- **Firma:** Asetronics AG, Belp bei Bern
+- **Rolle:** Betriebstechniker (Operating Technician)
+- **Ausbildung:** TEKO Bern (Schweiz)
+- **Maschine:** KohYoung AOI, C-Platform
+- **Muttersprache:** Nicht Deutsch → einfaches Deutsch, Schritt-fuer-Schritt
+- **Arbeitsweise:** IPERKA-Methodik, SMART-Ziele, pragmatisch
+- **Chat-Präferenz:** Keine langen Gespraeche — direkt zur Sache
 
 ---
 
-## 8. Git-Historie (letzte Commits)
+## >>> GIT-HISTORIE <<<
 
 ```
-(TBD) v2.4: Test-Ablauf umgestellt, Ergebnisse loeschen, Operator-Uebersicht, Rollen-Waehler
-e1145b7 v2.3: FK-Constraints Fix, Logo im PDF, Benutzer-Editierung, Test-Abschluss-Flow verbessert
-7ad734b v2.2.1: Asetronics-Logo integriert, SQL-Fix fuer Admin-Rolle
-60b0a1d v2.2: Admin-System (keine Selbstregistrierung), Benutzer-Loeschung repariert, Zurueck-Buttons
-6c553ec v2.1: Registrierungssystem, vordefinierte Fehlerkategorien, erweiterte Validierung, Erklaerungen
-d81fd3f README mit Einrichtungsanleitung und Dokumentation
-3bb3c3d AOI-Test-System v2.0: Komplette SPA mit Supabase-Datenbank
+(TBD)    v2.4: Test-Ablauf umgestellt, Ergebnisse loeschen, Operator-Uebersicht
+e1145b7  v2.3: FK-Constraints Fix, Logo im PDF, Benutzer-Editierung
+7ad734b  v2.2.1: Asetronics-Logo, SQL-Fix Admin-Rolle
+60b0a1d  v2.2: Admin-System, Benutzer-Loeschung, Zurueck-Buttons
+6c553ec  v2.1: Fehlerkategorien, Validierung, Erklaerungen
+d81fd3f  README mit Einrichtungsanleitung
+3bb3c3d  v2.0: Komplette SPA mit Supabase
 ```
 
 ---
 
-## 9. Bekannte Probleme / Einschraenkungen
+## >>> BEKANNTE EINSCHRAENKUNGEN <<<
 
-1. **Keine echte Authentifizierung** — Jeder mit Name+Nummer kann sich einloggen. Reicht fuer internes Training.
-2. **Anon Key sichtbar** — Supabase Anon Key ist im Frontend-Code. RLS-Policies schuetzen die Daten.
-3. **PDF ist Screenshot-basiert** — html2canvas macht einen Screenshot, keine echte Vektor-PDF. Kann bei langen Tests ungenau sein.
-4. **Unterschriften als Base64** — Werden in der Datenbank gespeichert (kann gross werden).
-5. **Supabase Free Tier Limits** — 500MB Storage, 50MB Datenbank, 5GB Bandbreite/Monat.
+1. Keine echte Auth — Name+Nummer reicht zum Login
+2. Anon Key im Frontend-Code sichtbar (RLS schuetzt Daten)
+3. PDF ist Screenshot-basiert (keine Vektor-PDF)
+4. Unterschriften als Base64 in DB (wird gross bei vielen Tests)
+5. Supabase Free Tier: 500MB Storage, 50MB DB, 5GB Bandbreite/Monat
 
 ---
 
-## 10. Quick-Start fuer neuen Chat
+## >>> QUICK-START FUER NEUEN CHAT <<<
 
-Wenn du diesen Chat fortsetzen willst:
-1. Lies diese Datei: `/Users/momu/html/aoi/KohYoung/aoi-test-system/PROJECT_MEMORY.md`
-2. Pruefe welche SQL-Fixes ausgefuehrt wurden (fix_v22, fix_v23, fix_v24) — User fragen
-3. Pruefe aktuellen Stand: `git log --oneline -5` im Projektverzeichnis
-4. Weiter mit dem naechsten offenen Punkt aus Abschnitt 5
+**Schritt 1:** Sag dem neuen Chat:
+> "Lies die Datei `/Users/momu/html/aoi/KohYoung/aoi-test-system/PROJECT_MEMORY.md` und arbeite damit weiter."
+
+**Schritt 2:** Der Chat liest alles und weiss:
+- Alle Links, Keys, URLs
+- Was das Projekt ist
+- Was erledigt ist
+- Was noch offen ist
+- Wo die Dateien liegen
+
+**Schritt 3:** Direkt am offenen Punkt weiterarbeiten (meistens: Fotos importieren oder SQL ausfuehren lassen)
