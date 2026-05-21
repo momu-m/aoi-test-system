@@ -376,8 +376,8 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
     <div class="container" id="resultContainer">
         <div class="card" id="resultCard"></div>
         <div class="btn-group mt-2 no-print">
-            <button class="btn btn-primary" onclick="exportPDF()">Als PDF exportieren</button>
-            <button class="btn btn-secondary" onclick="goBack()">Zurueck</button>
+            <button class="btn btn-primary btn-lg" onclick="exportPDF()">PDF drucken</button>
+            <button class="btn btn-secondary btn-lg" onclick="goBack()">Test schliessen</button>
         </div>
     </div>
 </div>
@@ -527,10 +527,19 @@ async function loadUsers(){
         const {data:users}=await db.from('users').select('*').order('role').order('name');
         if(!users||!users.length){ c.innerHTML='<div class="text-muted text-center">Keine Benutzer.</div>'; return }
         c.innerHTML=users.map(u=>`
-            <div class="user-row">
-                <div><strong>${u.name}</strong> <span class="text-muted">(${u.employee_number})</span></div>
+            <div class="user-row" id="urow-${u.id}">
+                <div id="udisplay-${u.id}">
+                    <strong>${u.name}</strong> <span class="text-muted">(${u.employee_number})</span>
+                </div>
+                <div id="uedit-${u.id}" style="display:none" class="flex gap-1 items-center flex-wrap">
+                    <input type="text" id="ueditname-${u.id}" class="form-input" value="${u.name}" style="max-width:180px;padding:6px 10px;font-size:13px">
+                    <input type="text" id="ueditnum-${u.id}" class="form-input" value="${u.employee_number}" style="max-width:120px;padding:6px 10px;font-size:13px">
+                    <button class="btn btn-success btn-sm" onclick="saveUserEdit('${u.id}')">Speichern</button>
+                    <button class="btn btn-secondary btn-sm" onclick="cancelUserEdit('${u.id}','${u.name.replace(/'/g,"\\'")}','${u.employee_number}')">Abbrechen</button>
+                </div>
                 <div class="flex gap-1 items-center">
                     <span class="test-badge ${u.role==='admin'?'badge-active':'badge-inactive'}">${u.role==='admin'?'Admin':'Operator'}</span>
+                    <button class="btn btn-outline btn-sm" onclick="startUserEdit('${u.id}')" style="font-size:11px;padding:4px 10px">Bearbeiten</button>
                     ${u.role!=='admin'?`<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}','${u.name}')">Entfernen</button>`:''}
                 </div>
             </div>`).join('');
@@ -556,8 +565,33 @@ async function deleteUser(id, name){
         if(error) throw error;
         await loadUsers();
     }catch(e){
-        alert('Fehler beim Loeschen: '+e.message+'\n\nTipp: Stellen Sie sicher, dass fix_v22.sql ausgefuehrt wurde.');
+        alert('Fehler beim Loeschen: '+e.message+'\n\nTipp: Stellen Sie sicher, dass fix_v23.sql ausgefuehrt wurde.');
     }
+}
+
+function startUserEdit(id){
+    const display=$('udisplay-'+id), edit=$('uedit-'+id);
+    if(display)display.style.display='none';
+    if(edit)edit.style.display='flex';
+}
+
+function cancelUserEdit(id, name, num){
+    const display=$('udisplay-'+id), edit=$('uedit-'+id);
+    if(display)display.style.display='';
+    if(edit)edit.style.display='none';
+    const nameIn=$('ueditname-'+id), numIn=$('ueditnum-'+id);
+    if(nameIn)nameIn.value=name;
+    if(numIn)numIn.value=num;
+}
+
+async function saveUserEdit(id){
+    const name=$('ueditname-'+id).value.trim(), num=$('ueditnum-'+id).value.trim();
+    if(!name||!num){alert('Name und Nummer duerfen nicht leer sein.');return}
+    try{
+        const {error}=await db.from('users').update({name,employee_number:num}).eq('id',id);
+        if(error) throw error;
+        await loadUsers();
+    }catch(e){alert('Fehler beim Speichern: '+e.message)}
 }
 
 // ============================================================
@@ -961,17 +995,15 @@ async function viewResult(rid){
                 const q=qm[a.question_id]||{};
                 const images=im[a.question_id]||[];
                 return `
-                <div class="question-card" style="page-break-inside:avoid">
-                    <div class="question-number">Frage ${idx+1}</div>
+                <div class="question-card" style="page-break-inside:avoid;border-left:5px solid ${a.is_correct?'#28a745':'#dc3545'}">
+                    <div class="flex justify-between items-center mb-1">
+                        <div class="question-number">Frage ${idx+1}</div>
+                        <div style="font-size:14px;font-weight:700;${a.is_correct?'color:#28a745':'color:#dc3545'}">${a.is_correct?'RICHTIG':'FALSCH'}</div>
+                    </div>
                     ${images.length?`<div class="op-images">${images.map(i=>`<div class="op-img" onclick="openModal('${i.image_url}')"><img src="${i.image_url}" alt="Bild"></div>`).join('')}</div>`:''}
-                    <div class="flex gap-2 mt-1 flex-wrap">
-                        <span style="padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;${a.answer==='gut'?'background:#d4edda;color:#155724':'background:#f8d7da;color:#721c24'}">
-                            ${a.answer==='gut'?'Gut (IO)':'Nicht gut (NIO)'}
-                        </span>
-                        <span style="padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;${a.is_correct?'background:#d4edda;color:#155724':'background:#f8d7da;color:#721c24'}">
-                            ${a.is_correct?'RICHTIG':'FALSCH'}
-                        </span>
-                        <span class="text-muted" style="font-size:12px">Richtig: ${q.correct_answer==='gut'?'Gut':'Nicht gut'}</span>
+                    <div class="mt-1" style="padding:10px;background:#f8f9fa;border-radius:8px">
+                        <div style="font-size:13px;margin-bottom:4px"><strong>Ihre Antwort:</strong> <span style="padding:3px 10px;border-radius:12px;font-weight:600;${a.answer==='gut'?'background:#d4edda;color:#155724':'background:#f8d7da;color:#721c24'}">${a.answer==='gut'?'Gut (IO)':'Nicht gut (NIO)'}</span></div>
+                        <div style="font-size:13px"><strong>Richtige Antwort:</strong> <span style="padding:3px 10px;border-radius:12px;font-weight:600;background:#d4edda;color:#155724">${q.correct_answer==='gut'?'Gut (IO)':'Nicht gut (NIO)'}</span></div>
                     </div>
                     ${a.selected_defects?`<div class="mt-1" style="font-size:12px"><strong>Grund:</strong> ${a.selected_defects}</div>`:''}
                     ${a.comment?`<div style="margin-top:6px;font-size:12px"><strong>Kommentar:</strong> ${a.comment}</div>`:''}
@@ -980,18 +1012,33 @@ async function viewResult(rid){
             }).join('');
         }
 
+        // Logo fuer PDF/Ergebnis-Ansicht
+        const logoEl=document.querySelector('.navbar-brand img');
+        const logoSrc=logoEl?logoEl.src:'';
+
         $('resultCard').innerHTML=`
-            <div style="text-align:center;border-bottom:2px solid #e9ecef;padding-bottom:16px;margin-bottom:16px">
+            <div style="text-align:center;border-bottom:2px solid #1e3a5f;padding-bottom:16px;margin-bottom:16px">
+                ${logoSrc?`<img src="${logoSrc}" style="height:50px;margin-bottom:8px" alt="Asetronics">`:''}
                 <h2 style="color:#1e3a5f;margin-bottom:4px">${test?test.title:'Test'}</h2>
                 <div class="text-muted">${test?test.description||'':''}</div>
+                <div style="font-size:11px;color:#6c757d;margin-top:4px">Asetronics AG · Belp bei Bern</div>
+            </div>
+            <div style="text-align:center;margin-bottom:20px;padding:16px;border-radius:12px;${r.passed?'background:#d4edda;border:2px solid #28a745':'background:#f8d7da;border:2px solid #dc3545'}">
+                <div style="font-size:14px;font-weight:700;letter-spacing:1px;margin-bottom:6px;${r.passed?'color:#155724':'color:#721c24'}">TEST ABGESCHLOSSEN</div>
+                <div style="font-size:32px;font-weight:700;${r.passed?'color:#28a745':'color:#dc3545'}">${r.passed?'BESTANDEN':'NICHT BESTANDEN'}</div>
+                <div style="font-size:20px;font-weight:700;margin-top:8px;color:#1e3a5f">${r.score} von ${r.max_score} Punkten (${Math.round((r.score/r.max_score)*100)}%)</div>
+                <div style="font-size:13px;color:#6c757d;margin-top:4px">Mindestpunktzahl: ${test?test.passing_score:'?'}</div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
-                <div class="stat-card"><div class="stat-number ${r.passed?'score-pass':'score-fail'}">${r.score}/${r.max_score}</div><div class="stat-label">Punkte</div></div>
-                <div class="stat-card"><div class="stat-number">${Math.round((r.score/r.max_score)*100)}%</div><div class="stat-label">Ergebnis</div></div>
-                <div class="stat-card"><div style="font-size:18px;font-weight:700;padding:8px;border-radius:20px;${r.passed?'background:#d4edda;color:#155724':'background:#f8d7da;color:#721c24'}">${r.passed?'BESTANDEN':'NICHT BESTANDEN'}</div><div class="stat-label">Mindest: ${test?test.passing_score:'?'}</div></div>
+                <div class="stat-card"><div class="stat-number" style="color:#28a745">${r.score}</div><div class="stat-label">Richtig</div></div>
+                <div class="stat-card"><div class="stat-number" style="color:#dc3545">${r.max_score-r.score}</div><div class="stat-label">Falsch</div></div>
+                <div class="stat-card"><div class="stat-number" style="font-size:22px">${fmtTime(r.time_seconds)}</div><div class="stat-label">Ben. Zeit</div></div>
             </div>
             <div style="font-size:13px;color:#6c757d;margin-bottom:16px">
-                Mitarbeiter: <strong>${r.operator_name||'-'}</strong> (${r.operator_number||'-'}) | ${fmtDate(r.completed_at)} | Zeit: ${fmtTime(r.time_seconds)}
+                Mitarbeiter: <strong>${r.operator_name||'-'}</strong> (${r.operator_number||'-'}) | ${fmtDate(r.completed_at)}
+            </div>
+            <div style="border-top:2px solid #1e3a5f;padding-top:12px;margin-bottom:16px">
+                <h3 style="color:#1e3a5f;font-size:16px;margin-bottom:12px">Auswertung der Antworten</h3>
             </div>
             ${qHTML}
             ${r.operator_signature||r.examiner_signature?`
