@@ -19,6 +19,7 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
 .navbar-role{padding:4px 12px;border-radius:20px;font-weight:600;font-size:12px;text-transform:uppercase}
 .role-pruefer{background:#ffc107;color:#333}
 .role-operator{background:#28a745;color:#fff}
+.role-admin{background:#dc3545;color:#fff}
 .btn-logout{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px}
 .btn-logout:hover{background:rgba(255,255,255,.3)}
 
@@ -205,18 +206,9 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
                 <input type="text" id="loginNumber" class="form-input" placeholder="z.B. 12345" autocomplete="off">
             </div>
             <div class="form-group">
-                <label class="form-label">Rolle <span class="req">*</span></label>
-                <div class="role-selector">
-                    <div class="role-option" id="rolePruefer" onclick="selectRole('pruefer')">
-                        <div class="role-icon">[Pr]</div>
-                        <div class="role-text">Pruefer</div>
-                        <div class="role-desc">Tests erstellen und auswerten</div>
-                    </div>
-                    <div class="role-option" id="roleOperator" onclick="selectRole('operator')">
-                        <div class="role-icon">[Op]</div>
-                        <div class="role-text">Operator</div>
-                        <div class="role-desc">Tests durchfuehren</div>
-                    </div>
+                <label class="form-label">Rolle</label>
+                <div style="padding:12px;background:#f8f9fa;border-radius:8px;font-size:13px;color:#495057;text-align:center">
+                    Die Rolle wird automatisch anhand Ihrer Registrierung bestimmt.
                 </div>
             </div>
 
@@ -243,7 +235,7 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
 <div id="viewPruefer" class="view">
     <div class="container">
         <div class="card">
-            <div class="card-header">Pruefer-Dashboard</div>
+            <div class="card-header">Admin-Dashboard</div>
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="showCreateTest()">+ Neuen Test erstellen</button>
                 <button class="btn btn-secondary" onclick="showPrueferResults()">Ergebnisse</button>
@@ -262,7 +254,7 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
                 <div class="card-header" style="margin:0;border:0;padding:0">Benutzer verwalten</div>
                 <button class="btn btn-secondary btn-sm" onclick="showPrueferDashboard()">Zurueck</button>
             </div>
-            <p class="text-muted mb-2" style="font-size:13px;">Hier koennen Sie Operatoren registrieren. Nur registrierte Operatoren koennen sich anmelden.</p>
+            <p class="text-muted mb-2" style="font-size:13px;">Hier koennen Sie Operatoren registrieren und entfernen. Nur registrierte Benutzer koennen sich anmelden.</p>
             <div class="card" style="background:#f8f9fa;">
                 <div class="form-group">
                     <label class="form-label">Neuen Operator registrieren</label>
@@ -407,7 +399,7 @@ const db = window.supabase.createClient(SB_URL, SB_KEY);
 // ============================================================
 // STATE
 // ============================================================
-let me = null, myRole = null, selRole = null;
+let me = null, myRole = null;
 let editId = null, eqs = [], eqCnt = 0;
 let aTest = null, aQuestions = [], aImages = {}, aAnswers = {}, aResultId = null;
 let tInterval = null, tSeconds = 0;
@@ -434,73 +426,55 @@ function fmtDate(iso){ if(!iso) return '-'; return new Date(iso).toLocaleDateStr
 // LOGIN
 // ============================================================
 function selectRole(r){
-    selRole = r;
-    $('rolePruefer').className = 'role-option'+(r==='pruefer'?' sel-p':'');
-    $('roleOperator').className = 'role-option'+(r==='operator'?' sel-o':'');
-    checkLogin();
+    // Nicht mehr benoetigt - Rolle kommt aus der Datenbank
 }
 
 function checkLogin(){
     const n=$('loginName').value.trim(), num=$('loginNumber').value.trim();
-    $('loginBtn').disabled = !(n && num && selRole);
+    $('loginBtn').disabled = !(n && num);
 }
 
 async function doLogin(){
     const name = $('loginName').value.trim();
     const num = $('loginNumber').value.trim();
     const msg = $('loginMsg');
-    if(!name||!num||!selRole){ msg.style.color='#dc3545'; msg.textContent='Bitte alle Felder ausfuellen.'; return; }
+    if(!name||!num){ msg.style.color='#dc3545'; msg.textContent='Bitte Name und Nummer eingeben.'; return; }
 
     try {
+        // Benutzer in der Datenbank suchen
         const {data: existing} = await db.from('users').select('*').eq('name',name).eq('employee_number',num).single();
 
-        if(selRole === 'operator'){
-            // Operator MUSS vom Pruefer registriert sein
-            if(!existing){
-                msg.style.color='#dc3545';
-                msg.textContent='Sie sind nicht registriert. Bitten Sie einen Pruefer, Sie zu registrieren.';
-                return;
-            }
-            if(existing.role !== 'operator'){
-                msg.style.color='#dc3545';
-                msg.textContent='Sie sind als Pruefer registriert, nicht als Operator.';
-                return;
-            }
-            me = existing;
-        } else {
-            // Pruefer: neu registrieren oder einloggen
-            if(existing){
-                if(existing.role !== 'pruefer'){
-                    msg.style.color='#dc3545';
-                    msg.textContent='Dieser Benutzer ist als Operator registriert.';
-                    return;
-                }
-                me = existing;
-            } else {
-                const {data, error} = await db.from('users').insert({name, employee_number:num, role:'pruefer'}).select().single();
-                if(error) throw error;
-                me = data;
-            }
+        if(!existing){
+            msg.style.color='#dc3545';
+            msg.textContent='Nicht registriert. Wenden Sie sich an den Administrator.';
+            return;
         }
 
-        myRole = selRole;
+        me = existing;
+        myRole = me.role; // Rolle aus der Datenbank: 'admin' oder 'operator'
+
         $('mainNavbar').classList.remove('hidden');
         $('navUserName').textContent = me.name;
         const rEl = $('navUserRole');
-        rEl.textContent = myRole==='pruefer'?'Pruefer':'Operator';
-        rEl.className = 'navbar-role '+(myRole==='pruefer'?'role-pruefer':'role-operator');
+        if(myRole === 'admin'){
+            rEl.textContent = 'Admin';
+            rEl.className = 'navbar-role role-admin';
+        } else {
+            rEl.textContent = 'Operator';
+            rEl.className = 'navbar-role role-operator';
+        }
         msg.textContent = '';
 
-        if(myRole==='pruefer') showPrueferDashboard(); else showOpTests();
+        if(myRole === 'admin') showPrueferDashboard(); else showOpTests();
     } catch(err){
         console.error(err);
         msg.style.color='#dc3545';
-        msg.textContent = 'Fehler: '+err.message;
+        msg.textContent = 'Nicht registriert. Wenden Sie sich an den Administrator.';
     }
 }
 
 function doLogout(){
-    me=null; myRole=null; selRole=null;
+    me=null; myRole=null;
     $('mainNavbar').classList.add('hidden');
     $('loginName').value=''; $('loginNumber').value=''; $('loginBtn').disabled=true;
     if(tInterval){clearInterval(tInterval);tInterval=null}
@@ -556,8 +530,8 @@ async function loadUsers(){
             <div class="user-row">
                 <div><strong>${u.name}</strong> <span class="text-muted">(${u.employee_number})</span></div>
                 <div class="flex gap-1 items-center">
-                    <span class="test-badge ${u.role==='pruefer'?'badge-active':'badge-inactive'}">${u.role==='pruefer'?'Pruefer':'Operator'}</span>
-                    ${u.id!==me.id?`<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">Entfernen</button>`:''}
+                    <span class="test-badge ${u.role==='admin'?'badge-active':'badge-inactive'}">${u.role==='admin'?'Admin':'Operator'}</span>
+                    ${u.role!=='admin'?`<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}','${u.name}')">Entfernen</button>`:''}
                 </div>
             </div>`).join('');
     }catch(e){c.innerHTML='<div style="color:#dc3545">'+e.message+'</div>'}
@@ -575,9 +549,15 @@ async function registerOperator(){
     }catch(e){alert('Fehler: '+e.message)}
 }
 
-async function deleteUser(id){
-    if(!confirm('Benutzer wirklich entfernen?'))return;
-    try{await db.from('users').delete().eq('id',id);await loadUsers()}catch(e){alert(e.message)}
+async function deleteUser(id, name){
+    if(!confirm(`Benutzer "${name}" wirklich entfernen?\n\nAlle seine Testergebnisse bleiben in der Datenbank erhalten.`))return;
+    try{
+        const {error}=await db.from('users').delete().eq('id',id);
+        if(error) throw error;
+        await loadUsers();
+    }catch(e){
+        alert('Fehler beim Loeschen: '+e.message+'\n\nTipp: Stellen Sie sicher, dass fix_v22.sql ausgefuehrt wurde.');
+    }
 }
 
 // ============================================================
@@ -1024,7 +1004,7 @@ async function viewResult(rid){
     }catch(e){alert(e.message)}
 }
 
-function goBack(){if(myRole==='pruefer')showPrueferDashboard();else showOpTests()}
+function goBack(){if(myRole==='admin')showPrueferDashboard();else showOpTests()}
 
 // ============================================================
 // PDF EXPORT
