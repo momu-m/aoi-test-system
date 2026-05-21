@@ -37,7 +37,8 @@
 - **fix_v24.sql:** DELETE-Policies fuer test_results + answers — **AUSGEFUEHRT**
 
 ### Referenz-Dateien (lokal, nicht im Repo)
-- **AOI-Fotos (267 Stueck):** `/Users/momu/html/aoi/KohYoung/FotosAOI/`
+- **AOI-Fotos (lokal, 252 Stueck):** `/Users/momu/html/aoi/KohYoung/FotosAOI/`
+- **Foto-Workflow:** Bilder werden bei der Testerstellung direkt vom Computer hochgeladen (komprimiert auf max 1200px → Supabase Storage `aoi-images`)
 - **Original Offline-Version:** `/Users/momu/html/AOI_Test/AOI-Test_MIT_TIMER_UND_UNTERSCHRIFT.html`
 - **KI-Anweisungen:** `/Users/momu/html/ki/Ki/Anweisungen für Claude.md`
 - **Projektregeln (IPERKA/SMART):** `/Users/momu/html/ki/Ki/projekten.md`
@@ -173,12 +174,8 @@ answers
 - [x] **fix_v24.sql** — AUSGEFUEHRT
 
 ### Naechste Schritte
-- [x] **252 AOI-Fotos importiert** → Supabase Storage `aoi-images/aoi-photos/`
-  - URL-Pattern: `https://yrephxnnkifrmwkqyzsa.supabase.co/storage/v1/object/public/aoi-images/aoi-photos/{DATEINAME}`
-  - Dateien: p002_i001.png bis p160_i002.png (ohne "Kopie"-Dateien)
-  - Upload-Script: `upload-photos.js` im Projekt-Root
-- [ ] **Erste echte Tests erstellen** mit den importierten Fotos (in der App als Admin)
-- [ ] **Operatoren registrieren** (in der App: Benutzer verwalten)
+- [ ] **Erste echte Tests erstellen** — in der App als Admin: Bilder direkt vom Computer pro Frage hochladen
+- [ ] **Operatoren registrieren** — in der App: Benutzer verwalten
 
 ### Spaeter (nice-to-have)
 - [ ] CSV-Export fuer Excel-Auswertung
