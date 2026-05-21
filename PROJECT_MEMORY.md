@@ -1,6 +1,6 @@
 # AOI-Test-System - Projekt-Gedaechtnis
 
-> **Letzte Aktualisierung:** 21.05.2026 (v2.4 — fix_v23 + fix_v24 ausgefuehrt)
+> **Letzte Aktualisierung:** 21.05.2026 (v2.4.2 — alles aktuell)
 > **Dieses Dokument dient als Kontext fuer neue Chat-Sitzungen. Lies alles ab hier.**
 
 ---
@@ -202,6 +202,8 @@ answers
 ## >>> GIT-HISTORIE <<<
 
 ```
+a89b8ff  v2.4.2: Storage aufgeraeumt, Foto-Workflow geklaert
+e146c2e  v2.4.1: 252 AOI-Fotos importiert (spaeter wieder geloescht)
 84acaa3  v2.4: Test-Ablauf umgestellt, Ergebnisse loeschen, Operator-Uebersicht
 e1145b7  v2.3: FK-Constraints Fix, Logo im PDF, Benutzer-Editierung
 7ad734b  v2.2.1: Asetronics-Logo, SQL-Fix Admin-Rolle
@@ -235,4 +237,4 @@ d81fd3f  README mit Einrichtungsanleitung
 - Was noch offen ist
 - Wo die Dateien liegen
 
-**Schritt 3:** Direkt am offenen Punkt weiterarbeiten (meistens: Fotos importieren oder SQL ausfuehren lassen)
+**Schritt 3:** Direkt am offenen Punkt weiterarbeiten (meistens: erste Tests erstellen, Operatoren registrieren)
