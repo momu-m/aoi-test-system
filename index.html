@@ -761,6 +761,22 @@ function showView(id){ document.querySelectorAll('.view').forEach(v=>v.classList
 function fmtTime(s){ const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0') }
 function fmtDate(iso){ if(!iso) return '-'; return new Date(iso).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) }
 
+// Einfache Schutzpruefung fuer Admin-Funktionen im Browser.
+// Wichtig: Das ist nur ein Frontend-Schutz. Die echte Sicherheit muss spaeter in Supabase mit Auth + RLS gemacht werden.
+function requireAdmin(){
+    if(me && myRole === 'admin') return true;
+    if($('toast')) showToast('Kein Admin-Zugriff. Bitte als Admin anmelden.','error');
+    else alert('Kein Admin-Zugriff. Bitte als Admin anmelden.');
+    if(!me) showView('viewLogin');
+    return false;
+}
+
+// CSV-Werte muessen sauber escaped werden, damit Kommas, Anfuehrungszeichen und Zeilenumbrueche Excel nicht stoeren.
+function csvCell(value){
+    const s = value === null || value === undefined ? '' : String(value);
+    return '"' + s.replace(/"/g,'""').replace(/\r?\n/g,' ') + '"';
+}
+
 // ============================================================
 // LOGIN
 // ============================================================
@@ -828,9 +844,10 @@ document.addEventListener('DOMContentLoaded',()=>{
 // ============================================================
 // PRUEFER DASHBOARD
 // ============================================================
-async function showPrueferDashboard(){ showView('viewPruefer'); await loadTests(); await loadAdminStats() }
+async function showPrueferDashboard(){ if(!requireAdmin())return; showView('viewPruefer'); await loadTests(); await loadAdminStats() }
 
 async function loadAdminStats(){
+    if(!requireAdmin())return;
     try{
         const {data:tests}=await db.from('tests').select('*');
         const {data:results}=await db.from('test_results').select('*');
@@ -849,6 +866,7 @@ async function loadAdminStats(){
 }
 
 async function loadTests(){
+    if(!requireAdmin())return;
     const c=$('prueferTestList'); c.innerHTML='<div class="loading"><div class="spinner"></div>'+t('dash_loading')+'</div>';
     try{
         const {data:tests,error}=await db.from('tests').select('*').order('created_at',{ascending:false});
@@ -872,14 +890,15 @@ async function loadTests(){
     }catch(e){ c.innerHTML='<div class="card" style="color:#dc3545">Fehler: '+escHtml(e.message)+'</div>' }
 }
 
-async function toggleActive(id,v){ try{await db.from('tests').update({is_active:v}).eq('id',id);await loadTests()}catch(e){alert(e.message)} }
+async function toggleActive(id,v){ if(!requireAdmin())return; try{await db.from('tests').update({is_active:v}).eq('id',id);await loadTests()}catch(e){alert(e.message)} }
 
 // ============================================================
 // BENUTZER VERWALTUNG
 // ============================================================
-async function showUserMgmt(){ showView('viewUserMgmt'); await loadUsers() }
+async function showUserMgmt(){ if(!requireAdmin())return; showView('viewUserMgmt'); await loadUsers() }
 
 async function loadUsers(){
+    if(!requireAdmin())return;
     const c=$('userList'); c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
     try{
         const {data:users}=await db.from('users').select('*').order('role').order('name');
@@ -897,18 +916,19 @@ async function loadUsers(){
                         <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
                     </select>
                     <button class="btn btn-success btn-sm" onclick="saveUserEdit('${u.id}')">${t('um_save')}</button>
-                    <button class="btn btn-secondary btn-sm" onclick="cancelUserEdit('${u.id}','${u.name.replace(/'/g,"\\'")}','${u.employee_number}')">${t('um_cancel')}</button>
+                    <button class="btn btn-secondary btn-sm" onclick="cancelUserEdit('${u.id}')">${t('um_cancel')}</button>
                 </div>
                 <div class="flex gap-1 items-center">
                     <span class="test-badge ${u.role==='admin'?'badge-active':'badge-inactive'}">${u.role==='admin'?t('nav_admin'):t('um_role_op')}</span>
                     <button class="btn btn-outline btn-sm" onclick="startUserEdit('${u.id}')" style="font-size:11px;padding:4px 10px">${t('um_edit_btn')}</button>
-                    ${u.role!=='admin'?`<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}','${escHtml(u.name)}')">${t('um_remove')}</button>`:''}
+                    ${u.role!=='admin'?`<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">${t('um_remove')}</button>`:''}
                 </div>
             </div>`).join('');
     }catch(e){c.innerHTML='<div style="color:#dc3545">'+escHtml(e.message)+'</div>'}
 }
 
 async function registerOperator(){
+    if(!requireAdmin())return;
     const name=$('newUserName').value.trim(), num=$('newUserNumber').value.trim();
     const role=$('newUserRole').value;
     if(!name||!num){alert(t('um_err_name_num'));return}
@@ -921,8 +941,9 @@ async function registerOperator(){
     }catch(e){alert('Fehler: '+e.message)}
 }
 
-async function deleteUser(id, name){
-    if(!confirm(t('um_confirm_del').replace('{name}',name)))return;
+async function deleteUser(id){
+    if(!requireAdmin())return;
+    if(!confirm(t('um_confirm_del').replace('{name}','diesen Benutzer')))return;
     try{
         const {error}=await db.from('users').delete().eq('id',id);
         if(error) throw error;
@@ -933,21 +954,20 @@ async function deleteUser(id, name){
 }
 
 function startUserEdit(id){
+    if(!requireAdmin())return;
     const display=$('udisplay-'+id), edit=$('uedit-'+id);
     if(display)display.style.display='none';
     if(edit)edit.style.display='flex';
 }
 
-function cancelUserEdit(id, name, num){
+function cancelUserEdit(id){
     const display=$('udisplay-'+id), edit=$('uedit-'+id);
     if(display)display.style.display='';
     if(edit)edit.style.display='none';
-    const nameIn=$('ueditname-'+id), numIn=$('ueditnum-'+id);
-    if(nameIn)nameIn.value=name;
-    if(numIn)numIn.value=num;
 }
 
 async function saveUserEdit(id){
+    if(!requireAdmin())return;
     const name=$('ueditname-'+id).value.trim(), num=$('ueditnum-'+id).value.trim();
     const role=$('ueditrole-'+id).value;
     if(!name||!num){alert(t('um_err_empty'));return}
@@ -962,6 +982,7 @@ async function saveUserEdit(id){
 // TEST ERSTELLEN / BEARBEITEN
 // ============================================================
 function showCreateTest(){
+    if(!requireAdmin())return;
     editId=null;eqs=[];eqCnt=0;
     $('testTitleIn').value='AOI-Beurteilungstest';$('testDescIn').value='Beurteilung nach IPC-A-610';$('testPassIn').value='24';$('testTimeLimitIn').value='0';
     $('ctTitle').textContent=t('tc_new');$('editQContainer').innerHTML='';
@@ -969,6 +990,7 @@ function showCreateTest(){
 }
 
 async function editTest(id){
+    if(!requireAdmin())return;
     try{
         const {data:test}=await db.from('tests').select('*').eq('id',id).single();
         editId=id;$('testTitleIn').value=test.title;$('testDescIn').value=test.description||'';$('testPassIn').value=test.passing_score;
@@ -998,11 +1020,13 @@ function setAnswer(tid,a){const q=eqs.find(q=>q.tid===tid);if(q)q.answer=a;rende
 function setExplanation(tid,txt){const q=eqs.find(q=>q.tid===tid);if(q)q.explanation=txt}
 
 function triggerUpload(tid){
+    if(!requireAdmin())return;
     const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
     inp.onchange=e=>handleUpload(e,tid);inp.click();
 }
 
 async function handleUpload(ev,tid){
+    if(!requireAdmin())return;
     const q=eqs.find(q=>q.tid===tid);if(!q)return;
     for(const f of ev.target.files){
         if(!f.type.startsWith('image/'))continue;
@@ -1033,6 +1057,7 @@ function compressImg(file){
 }
 
 async function rmImg(tid,idx){
+    if(!requireAdmin())return;
     const q=eqs.find(q=>q.tid===tid);if(!q)return;
     const img=q.images[idx];
     try{const p=img.url.split('/aoi-images/');if(p[1])await db.storage.from('aoi-images').remove([p[1]])}catch(e){console.warn('Storage delete warning:',e)}
@@ -1065,6 +1090,7 @@ function renderEditQ(){
 }
 
 async function saveTest(){
+    if(!requireAdmin())return;
     const title=$('testTitleIn').value.trim(),desc=$('testDescIn').value.trim(),ps=parseInt($('testPassIn').value)||0;
     const timeLimit=parseInt($('testTimeLimitIn').value)||0;
     if(!title){alert(t('tc_err_title'));return}
@@ -1095,6 +1121,7 @@ async function saveTest(){
 // PRUEFER ERGEBNISSE
 // ============================================================
 async function showPrueferResults(){
+    if(!requireAdmin())return;
     showView('viewPrueferResults');const c=$('prueferResultsList');
     c.innerHTML='<div class="loading"><div class="spinner"></div>'+t('dash_loading')+'</div>';
     try{
@@ -1107,14 +1134,15 @@ async function showPrueferResults(){
                     <div class="text-center"><div class="result-score ${r.passed?'score-pass':'score-fail'}">${r.score}/${r.max_score}</div><div style="font-size:12px;font-weight:600;color:${r.passed?'#28a745':'#dc3545'}">${r.passed?t('res_passed'):t('res_failed')}</div></div>
                     <div class="flex gap-1">
                         <button class="btn btn-primary btn-sm" onclick="viewResult('${r.id}')">${t('res_details')}</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteResult('${r.id}','${escHtml(r.operator_name||'')}')">${t('res_delete')}</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteResult('${r.id}')">${t('res_delete')}</button>
                     </div>
                 </div>
             </div>`).join('');
     }catch(e){c.innerHTML='<div style="color:#dc3545">'+escHtml(e.message)+'</div>'}
 }
 
-async function deleteResult(id, opName){
+async function deleteResult(id){
+    if(!requireAdmin())return;
     if(!confirm(t('res_confirm_del')))return;
     try{
         await db.from('answers').delete().eq('result_id',id);
@@ -1583,6 +1611,7 @@ function goBack(){if(myRole==='admin')showPrueferDashboard();else showOpTests()}
 // OPERATOR UEBERSICHT (Admin)
 // ============================================================
 async function showOperatorOverview(){
+    if(!requireAdmin())return;
     showView('viewOpOverview');const c=$('opOverviewList');
     c.innerHTML='<div class="loading"><div class="spinner"></div>'+t('dash_loading')+'</div>';
     try{
@@ -1632,22 +1661,27 @@ async function showOperatorOverview(){
 // CSV EXPORT
 // ============================================================
 async function exportCSV(){
+    if(!requireAdmin())return;
     try{
         const {data:results}=await db.from('test_results').select('*,tests(title)').order('completed_at',{ascending:false}).limit(500);
         if(!results||!results.length){showToast(t('res_none'),'error');return}
-        // CSV Header
-        let csv='Test,Operator,Mitnr,Punkte,Max,Punktzahl,Bestanden,Datum,Zeit(s)\n';
+        // CSV Header und Zeilen werden als Array gebaut. So bleiben die Spalten stabil.
+        const rows = [['Test','Operator','Mitnr','Punkte','Max','Punktzahl','Bestanden','Datum','Zeit(s)']];
         results.forEach(r=>{
-            csv+='"'+(r.tests?r.tests.title:'')+'",';
-            csv+='"'+(r.operator_name||'')+'",';
-            csv+='"'+(r.operator_number||'')+'",';
-            csv+=r.score+',';
-            csv+=r.max_score+',';
-            csv+=r.max_score?Math.round((r.score/r.max_score)*100)+'%':'0%,';
-            csv+=(r.passed?'Ja':'Nein')+',';
-            csv+='"'+fmtDate(r.completed_at)+'",';
-            csv+=r.time_seconds+'\n';
+            const percent = r.max_score ? Math.round((r.score/r.max_score)*100)+'%' : '0%';
+            rows.push([
+                r.tests ? r.tests.title : '',
+                r.operator_name || '',
+                r.operator_number || '',
+                r.score,
+                r.max_score,
+                percent,
+                r.passed ? 'Ja' : 'Nein',
+                fmtDate(r.completed_at),
+                r.time_seconds
+            ]);
         });
+        const csv = rows.map(row => row.map(csvCell).join(',')).join('\n') + '\n';
         const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
         const url=URL.createObjectURL(blob);
         const a=document.createElement('a');a.href=url;a.download='AOI_Ergebnisse_'+new Date().toISOString().split('T')[0]+'.csv';
@@ -1660,6 +1694,7 @@ async function exportCSV(){
 // TEST DUPLIZIEREN
 // ============================================================
 async function duplicateTest(id){
+    if(!requireAdmin())return;
     try{
         const {data:test}=await db.from('tests').select('*').eq('id',id).single();
         const {data:qs}=await db.from('questions').select('*').eq('test_id',id).order('question_number');

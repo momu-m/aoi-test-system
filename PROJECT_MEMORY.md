@@ -1,6 +1,6 @@
 # AOI-Test-System - Projekt-Gedaechtnis
 
-> **Letzte Aktualisierung:** 22.05.2026 (v2.5 — alles aktuell)
+> **Letzte Aktualisierung:** 22.05.2026 (v2.5.1 — CSV-Fix + Frontend-Admin-Schutz)
 > **Dieses Dokument dient als Kontext fuer neue Chat-Sitzungen. Lies alles ab hier.**
 
 ---
@@ -21,7 +21,7 @@
 
 ### Admin-Login (fuer Tests)
 - **Name:** `Mohamad Murad`
-- **Mitarbeiternummer:** `Mohamad89n`
+- **Mitarbeiternummer:** nicht mehr im Projektgedaechtnis dokumentieren
 - **Rolle:** `admin` (einziger Admin im System)
 
 ### Projekt-Verzeichnis (lokal)
@@ -35,7 +35,7 @@
 - **fix_v22.sql:** Delete-Policy + Admin-Account — **AUSGEFUEHRT**
 - **fix_v23.sql:** FK-Constraints ON DELETE SET NULL — **AUSGEFUEHRT**
 - **fix_v24.sql:** DELETE-Policies fuer test_results + answers — **AUSGEFUEHRT**
-- **fix_v25.sql:** Zeitlimit-Spalte (time_limit) — **MUSS NOCH AUSGEFUEHRT WERDEN**
+- **fix_v25.sql:** Zeitlimit-Spalte (time_limit) — **AUSGEFUEHRT**
 
 ### Referenz-Dateien (lokal, nicht im Repo)
 - **AOI-Fotos (lokal, 252 Stueck):** `/Users/momu/html/aoi/KohYoung/FotosAOI/`
@@ -181,13 +181,11 @@ defect_categories (Lookup-Tabelle, in update_v2.sql erstellt)
 - [x] v2.3: FK-Constraints Fix, Logo im PDF, Benutzer-Editierung
 - [x] v2.4: Neuer Test-Ablauf (pruefen vor unterschreiben), Ergebnisse loeschen, Operator-Uebersicht, Rollen-Waehler
 - [x] v2.5: Mehrsprachigkeit DE/EN, Admin-Anleitung (Help View), XSS-Schutz, Timer-Fix (Date.now), High-DPI Signature, CSV-Export, Statistik-Dashboard, Test-Duplikation, Zeitlimit, Rollenaenderung, Fehlerbehandlung verbessert
+- [x] v2.5.1: CSV-Spaltenfehler behoben, CSV-Escaping verbessert, Frontend-Admin-Schutz fuer kritische Admin-Aktionen ergaenzt, PROJECT_MEMORY korrigiert
 
 ---
 
 ## >>> WAS IST OFFEN / TODO? <<<
-
-### Sofort — User muss SQL ausfuehren
-- [ ] **fix_v25.sql** — Zeitlimit-Spalte `time_limit` zur tests-Tabelle hinzufuegen
 
 ### Naechste Schritte
 - [ ] **Erste echte Tests erstellen** — in der App als Admin: Bilder direkt vom Computer pro Frage hochladen
@@ -218,7 +216,8 @@ defect_categories (Lookup-Tabelle, in update_v2.sql erstellt)
 ## >>> GIT-HISTORIE <<<
 
 ```
-(NEU) v2.5: Mehrsprachigkeit DE/EN, Admin-Anleitung, Sicherheitsfixes, CSV, Stats, Duplikation, Zeitlimit
+v2.5.1: CSV-Fix und Admin-Schutz
+47834ae v2.5: Mehrsprachigkeit DE/EN, Admin-Anleitung, Sicherheitsfixes, CSV, Stats, Duplikation, Zeitlimit
 a89b8ff  v2.4.2: Storage aufgeraeumt, Foto-Workflow geklaert
 e146c2e  v2.4.1: 252 AOI-Fotos importiert (spaeter wieder geloescht)
 84acaa3  v2.4: Test-Ablauf umgestellt, Ergebnisse loeschen, Operator-Uebersicht
@@ -255,7 +254,7 @@ d81fd3f  README mit Einrichtungsanleitung
 - Was noch offen ist
 - Wo die Dateien liegen
 
-**Schritt 3:** Direkt am offenen Punkt weiterarbeiten (meistens: fix_v25.sql ausfuehren, erste Tests erstellen, Operatoren registrieren)
+**Schritt 3:** Direkt am offenen Punkt weiterarbeiten (meistens: erste Tests erstellen, Operatoren registrieren, Sicherheit mit Supabase Auth planen)
 
 ---
 
