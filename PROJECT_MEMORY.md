@@ -1,6 +1,6 @@
 # AOI-Test-System - Projekt-Gedaechtnis
 
-> **Letzte Aktualisierung:** 21.05.2026 (v2.4.2 — alles aktuell)
+> **Letzte Aktualisierung:** 22.05.2026 (v2.5 — alles aktuell)
 > **Dieses Dokument dient als Kontext fuer neue Chat-Sitzungen. Lies alles ab hier.**
 
 ---
@@ -35,6 +35,7 @@
 - **fix_v22.sql:** Delete-Policy + Admin-Account — **AUSGEFUEHRT**
 - **fix_v23.sql:** FK-Constraints ON DELETE SET NULL — **AUSGEFUEHRT**
 - **fix_v24.sql:** DELETE-Policies fuer test_results + answers — **AUSGEFUEHRT**
+- **fix_v25.sql:** Zeitlimit-Spalte (time_limit) — **MUSS NOCH AUSGEFUEHRT WERDEN**
 
 ### Referenz-Dateien (lokal, nicht im Repo)
 - **AOI-Fotos (lokal, 252 Stueck):** `/Users/momu/html/aoi/KohYoung/FotosAOI/`
@@ -60,19 +61,20 @@
 ### Technologie-Stack
 | Was | Technologie |
 |---|---|
-| Frontend | Single HTML-Datei (index.html, ~1294 Zeilen) |
+| Frontend | Single HTML-Datei (index.html, ~1912 Zeilen) |
 | Hosting | GitHub Pages (kostenlos) |
 | Datenbank | Supabase PostgreSQL (Free Tier) |
 | Bildspeicher | Supabase Storage Bucket `aoi-images` |
 | PDF-Export | jsPDF + html2canvas (CDN) |
-| Unterschriften | HTML5 Canvas (Zeichnen) |
+| Unterschriften | HTML5 Canvas (Zeichnen, High-DPI Support) |
 | Auth | Keine echte Auth — Login mit Name+Nummer, Rolle aus DB |
+| i18n | Eigenes System (DE/EN), Sprache in localStorage |
 
 ---
 
 ## >>> DATENBANK-SCHEMA <<<
 
-6 Tabellen in Supabase:
+6 Tabellen in Supabase + 1 Lookup-Tabelle:
 
 ```
 users
@@ -85,6 +87,7 @@ users
 tests
 ├── id (uuid, PK)
 ├── title, description, passing_score, is_active
+├── time_limit (integer, Minuten, 0=kein Limit) — NEU in v2.5
 ├── created_by → users.id
 └── created_at, updated_at
 
@@ -115,6 +118,10 @@ answers
 ├── result_id → test_results.id
 ├── question_id → questions.id
 ├── answer, is_correct, selected_defects, comment
+
+defect_categories (Lookup-Tabelle, in update_v2.sql erstellt)
+├── id, category, label_de, label_en, icon, sort_order
+└── (Wird aktuell nicht im Code verwendet — Defects sind hardcoded mit i18n)
 ```
 
 ### RLS-Policies (Row Level Security)
@@ -129,22 +136,32 @@ answers
 
 ### Admin (Mohamad Murad)
 - Login mit Name + Mitarbeiternummer → Rolle aus DB
-- Dashboard: Test-Uebersicht, aktiv/inaktiv umschalten
-- Tests erstellen/bearbeiten: Fragen, Bilder upload, Musterloesung, Erklaerung
-- Benutzer verwalten: Operatoren + Admins registrieren, Name/Nummer aendern, entfernen
+- Dashboard: Test-Uebersicht mit Statistik-Karten (Tests, Aktiv, Ergebnisse, Bestehensquote)
+- Tests erstellen/bearbeiten: Fragen, Bilder upload, Musterloesung, Erklaerung, Zeitlimit
+- Tests duplizieren (neu in v2.5)
+- Benutzer verwalten: Operatoren + Admins registrieren, Name/Nummer/**Rolle** aendern, entfernen
 - Ergebnisse einsehen + loeschen
+- CSV-Export fuer Excel (neu in v2.5)
 - Operator-Uebersicht: Statistiken pro Operator
 - PDF-Export
+- Admin-Anleitung (Help View, DE + EN, neu in v2.5)
 
-### Operator — Test-Ablauf (v2.4)
+### Operator — Test-Ablauf (v2.5)
 1. Fragen beantworten: IO/NIO + Fehlergruende als Klick-Chips, Timer laeuft
-2. "Test abschliessen" → Timer stoppt, Fragen werden read-only
-3. Resultat sehen: Richtig/Falsch pro Frage, Erklaerung, Musterloesung
-4. Unterschreiben: Unterschrift Mitarbeiter (Pflicht) + Pruefer (optional)
-5. "Unterschreiben & Speichern" → Ergebnis in DB gespeichert
-6. Ergebnis-Ansicht: TEST ABGESCHLOSSEN Banner, Score, PDF drucken
+2. **Zeitlimit** (wenn gesetzt): Test wird automatisch abgeschlossen bei Ablauf (neu in v2.5)
+3. "Test abschliessen" → Timer stoppt, Fragen werden read-only
+4. Resultat sehen: Richtig/Falsch pro Frage, Erklaerung, Musterloesung
+5. Unterschreiben: Unterschrift Mitarbeiter (Pflicht) + Pruefer (optional)
+6. "Unterschreiben & Speichern" → Ergebnis in DB gespeichert
+7. Ergebnis-Ansicht: TEST ABGESCHLOSSEN Banner, Score, PDF drucken
 
-### Vordefinierte Fehlerkategorien (Klick-Chips bei NIO)
+### Mehrsprachigkeit (neu in v2.5)
+- **Deutsch** und **Englisch** — Umschalter in der Navbar (DE/EN)
+- Sprache wird in localStorage gespeichert
+- Alle UI-Texte uebersetzt (Buttons, Labels, Meldungen, Fehlerkategorien)
+- Admin-Anleitung komplett auf DE und EN verfuegbar
+
+### Vordefinierte Fehlerkategorien (Klick-Chips bei NIO, mit i18n)
 - **Loetfehler:** Kalte Loetstelle, Zu viel Lot, Zu wenig Lot, Lotbruecke
 - **Platzierung:** Bauteil fehlt, verdreht, verschoben, falsches, gekippt
 - **Reinigung:** Flux-Reste, Kontamination
@@ -163,26 +180,25 @@ answers
 - [x] v2.2.1: Asetronics-Logo, fix_v22.sql
 - [x] v2.3: FK-Constraints Fix, Logo im PDF, Benutzer-Editierung
 - [x] v2.4: Neuer Test-Ablauf (pruefen vor unterschreiben), Ergebnisse loeschen, Operator-Uebersicht, Rollen-Waehler
-- [x] Alles committed und auf GitHub Pages deployed
+- [x] v2.5: Mehrsprachigkeit DE/EN, Admin-Anleitung (Help View), XSS-Schutz, Timer-Fix (Date.now), High-DPI Signature, CSV-Export, Statistik-Dashboard, Test-Duplikation, Zeitlimit, Rollenaenderung, Fehlerbehandlung verbessert
 
 ---
 
 ## >>> WAS IST OFFEN / TODO? <<<
 
-### ~~Sofort — User muss SQL ausfuehren~~ → ALLES AUSGEFUEHRT
-- [x] **fix_v23.sql** — AUSGEFUEHRT
-- [x] **fix_v24.sql** — AUSGEFUEHRT
+### Sofort — User muss SQL ausfuehren
+- [ ] **fix_v25.sql** — Zeitlimit-Spalte `time_limit` zur tests-Tabelle hinzufuegen
 
 ### Naechste Schritte
 - [ ] **Erste echte Tests erstellen** — in der App als Admin: Bilder direkt vom Computer pro Frage hochladen
 - [ ] **Operatoren registrieren** — in der App: Benutzer verwalten
 
 ### Spaeter (nice-to-have)
-- [ ] CSV-Export fuer Excel-Auswertung
-- [ ] Test-Vorlagen
-- [ ] Mehrsprachigkeit (Operatoren sind international)
 - [ ] Bessere PDF (Vektor statt Screenshot)
 - [ ] Echte Authentifizierung (Supabase Auth)
+- [ ] Defect-Kategorien aus DB laden statt hardcoded
+- [ ] Offline-Modus (Service Worker)
+- [ ] Mobile-Optimierung fuer Tablets
 
 ---
 
@@ -202,6 +218,7 @@ answers
 ## >>> GIT-HISTORIE <<<
 
 ```
+(NEU) v2.5: Mehrsprachigkeit DE/EN, Admin-Anleitung, Sicherheitsfixes, CSV, Stats, Duplikation, Zeitlimit
 a89b8ff  v2.4.2: Storage aufgeraeumt, Foto-Workflow geklaert
 e146c2e  v2.4.1: 252 AOI-Fotos importiert (spaeter wieder geloescht)
 84acaa3  v2.4: Test-Ablauf umgestellt, Ergebnisse loeschen, Operator-Uebersicht
@@ -222,6 +239,7 @@ d81fd3f  README mit Einrichtungsanleitung
 3. PDF ist Screenshot-basiert (keine Vektor-PDF)
 4. Unterschriften als Base64 in DB (wird gross bei vielen Tests)
 5. Supabase Free Tier: 500MB Storage, 50MB DB, 5GB Bandbreite/Monat
+6. Defect-Kategorien hardcoded (nicht aus DB geladen)
 
 ---
 
@@ -237,4 +255,52 @@ d81fd3f  README mit Einrichtungsanleitung
 - Was noch offen ist
 - Wo die Dateien liegen
 
-**Schritt 3:** Direkt am offenen Punkt weiterarbeiten (meistens: erste Tests erstellen, Operatoren registrieren)
+**Schritt 3:** Direkt am offenen Punkt weiterarbeiten (meistens: fix_v25.sql ausfuehren, erste Tests erstellen, Operatoren registrieren)
+
+---
+
+## >>> v2.5 AENDERUNGEN IM DETAIL <<<
+
+### Neue CSS-Klassen
+- `.lang-switch`, `.lang-btn` — Sprach-Umschalter
+- `.help-nav`, `.help-nav-btn` — Help-Navigation
+- `.help-step`, `.help-step-num` — Schritt-fuer-Schritt
+- `.help-tip`, `.help-warn` — Hinweis/Warnung
+- `.stats-grid`, `.stats-card`, `.stats-big` — Statistik-Karten
+- `.toast` — Toast-Benachrichtigungen
+
+### Neue JavaScript-Funktionen
+- `t(key)` — Uebersetzungsfunktion (i18n)
+- `escHtml(s)` — XSS-Schutz (HTML escaping)
+- `setLang(lang)` — Sprache wechseln
+- `applyLang()` — Alle statischen Elemente aktualisieren
+- `getDefects()` — Fehlerkategorien mit i18n
+- `showToast(msg, type)` — Toast statt alert()
+- `loadAdminStats()` — Statistik-Karten laden
+- `duplicateTest(id)` — Test kopieren
+- `exportCSV()` — CSV-Export
+- `showHelp()` — Admin-Anleitung anzeigen
+- `showHelpSection(id)` — Help-Sektion wechseln
+- `goBackFromHelp()` — Zurueck von Help
+
+### Geaenderte Funktionen (alle mit i18n + XSS-Fix)
+- `doLogin()`, `loadTests()`, `loadUsers()`, `registerOperator()`, `deleteUser()`
+- `saveUserEdit()` — jetzt auch Rollenaenderung
+- `showCreateTest()`, `editTest()`, `saveTest()` — jetzt mit Zeitlimit
+- `renderEditQ()`, `loadOpTests()`, `loadOpHistory()`
+- `startTest()` — genauer Timer (Date.now), Zeitlimit-Pruefung
+- `renderTakeQ()` — i18n-Fehlerkategorien
+- `checkComplete()`, `cancelTest()`
+- `reviewTest()`, `backToTest()` — genauer Timer
+- `finalizeTest()`, `viewResult()`
+- `showOperatorOverview()`, `showPrueferResults()`, `deleteResult()`
+- `initSig()` — High-DPI Support
+- `rmImg()` — kein silent catch mehr
+
+### Neue HTML-Views
+- `viewHelp` — Admin-Anleitung (6 Sektionen, DE + EN)
+- Toast-Element
+- Sprach-Umschalter in Navbar
+- Statistik-Bereich im Dashboard
+- CSV-Export-Button bei Ergebnisse
+- Zeitlimit-Feld bei Testerstellung
